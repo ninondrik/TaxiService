@@ -18,12 +18,16 @@ android {
         debug {
             buildConfigField "String", "GoogleMapsKey", GOOGLE_MAPS_API_KEY
             resValue "string", "google_maps_key", GOOGLE_MAPS_API_KEY
+            resValue "string", "server_address", ServerAddress
+            resValue "integer", "server_port", ServerPort
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "String", "GoogleMapsKey", GOOGLE_MAPS_API_KEY
             resValue "string", "google_maps_key", GOOGLE_MAPS_API_KEY
+            resValue "string", "server_address", ServerAddress
+            resValue "integer", "server_port", ServerPort
         }
     }
     productFlavors {

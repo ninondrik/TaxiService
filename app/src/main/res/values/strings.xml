@@ -9,7 +9,6 @@
     <string name="register">Register</string>
     <string name="agree_terms_privacy">By clicking the register button, you agree to our &lt;a href="http://www.google.com">Terms &amp; Conditions&lt;/a>, and &lt;a href="http://www.google.com">Privacy Policy&lt;/a></string>
     <string name="for_registered_users">I\'m already registered in service.</string>
-    <string name="server_address" translatable="false">192.168.1.72</string>
     <string name="internet_connection">No internet connection!</string>
     <string name="wrong_data">Wrong login or password</string>
     <string name="not_registered">I\'m not registered yet.</string>
