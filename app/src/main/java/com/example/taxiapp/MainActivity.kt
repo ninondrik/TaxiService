@@ -139,7 +139,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun showOrdersEndScreen() {
-        // TODO: THIS PART!!!
         ridingEndDialog!!.show()
         ridingEndDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         ridingEndDialog!!.window!!.setGravity(Gravity.BOTTOM)
@@ -168,6 +167,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         optionsDialog!!.addressEdit.setText(addressTextView!!.text)
         optionsDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         optionsDialog!!.window!!.setGravity(Gravity.BOTTOM)
+
         optionsDialog!!.wishesButton.setOnClickListener {
             wishesDialog!!.show()
             wishesDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -195,6 +195,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         (destinationEdit as AutocompleteSupportFragment).setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 destinationMarker = mMap!!.addMarker(MarkerOptions().position(place.latLng!!))
+                with(mMap) {
+                    this!!.setOnCameraIdleListener(null)
+                    this.setOnCameraMoveStartedListener(null)
+                }
                 mMap!!.moveCamera(CameraUpdateFactory
                         .newLatLngZoom(currentMarker!!.position, DEFAULT_ZOOM.toFloat()))
                 (destinationEdit as AutocompleteSupportFragment).setText(place.address)

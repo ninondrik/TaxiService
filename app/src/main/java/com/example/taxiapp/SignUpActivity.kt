@@ -3,8 +3,9 @@ package com.example.taxiapp
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.text.Editable
 import android.text.Html
-import android.text.TextUtils
+import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.View
@@ -16,7 +17,10 @@ import kotlinx.android.synthetic.main.activity_sign_up.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+
 class SignUpActivity : AppCompatActivity() {
+
+    private var validation: Validation? = null
     private var nameEditText: EditText? = null
     private var phoneEditText: EditText? = null
     private var emailEditText: EditText? = null
@@ -29,41 +33,57 @@ class SignUpActivity : AppCompatActivity() {
         phoneEditText = phoneEdit
         emailEditText = emailEdit
         passwordEditText = passwordEdit
-        countryCodePicker.registerPhoneNumberTextView(phoneEditText)
+        validation = Validation(this@SignUpActivity)
+//        countryCodePicker.registerPhoneNumberTextView(phoneEditText)
         val policy = Html.fromHtml(getString(R.string.agree_terms_privacy), Html.FROM_HTML_MODE_LEGACY)
         val termsOfUse = agree_terms_privacy
         termsOfUse.text = policy
         termsOfUse.movementMethod = LinkMovementMethod.getInstance()
-    }
 
-    private fun isValidEmail(sequence: CharSequence): Boolean {
-        return !TextUtils.isEmpty(sequence)
-    }
 
-    private fun isValidPhone(sequence: CharSequence): Boolean {
-        return !TextUtils.isEmpty(sequence)
+        // Validate name field
+        nameEditText!!.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                validation!!.isNameValid(nameEditText)
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+        // Validate password field
+        passwordEditText!!.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                validation!!.isPasswordValid(passwordEditText, true)
+            }
+        })
+        // Validate phone field
+        phoneEditText!!.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                validation!!.isPhoneValid(phoneEditText)
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+        })
+
+
     }
 
     fun register(view: View) {
-        // TODO: fields validation
-        if (nameEditText!!.text.toString().trim { it <= ' ' }.isEmpty()) {
-            nameEditText!!.requestFocus()
-            nameEditText!!.error = "It's just a formality"
-        } else if (!isValidPhone(phoneEditText!!.toString())) {
-            phoneEditText!!.requestFocus()
-            phoneEditText!!.error = "Phone can't be empty"
-        } else if (!isValidEmail(emailEditText!!.toString())) {
-            emailEditText!!.requestFocus()
-            emailEditText!!.error = "Email can't be empty"
-        } else if (passwordEditText!!.text.toString().trim { it <= ' ' }.isEmpty()) {
-            passwordEditText!!.requestFocus()
-            passwordEditText!!.error = "Password can't be empty"
-        } else {
+        val fieldsValidation = mapOf(
+                "name" to validation!!.isNameValid(nameEditText),
+                "phone" to validation!!.isPhoneValid(phoneEditText),
+                "password" to validation!!.isPasswordValid(passwordEditText, true),
+                "email" to validation!!.isEmailValid(emailEditText)
+        )
+        if (!fieldsValidation.values.contains(false)) {
             GlobalScope.launch {
                 val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
                 val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
-                var phoneText: String = countryCodePicker.fullNumber.toString()
-                phoneText = phoneText.replace("\\D+".toRegex(), "")
+                val phoneText = countryCodePicker.selectedCountryCode + phoneEditText!!.text
                 val customer = Customer.newBuilder()
                         .setName(nameEditText!!.text.toString())
                         .setPhoneNumber(phoneText)
@@ -86,14 +106,14 @@ class SignUpActivity : AppCompatActivity() {
                     if (e.status.cause is java.net.ConnectException) {
                         runOnUiThread { Toast.makeText(this@SignUpActivity, R.string.internet_connection, Toast.LENGTH_LONG).show() }
                     }
-                    //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
+                    //logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
                     managedChannel.shutdown()
                 }
             }
 
         }
-
     }
+
 
     fun changeForm(view: View) {
         redirectToLogin.setTextColor(resources.getColor(R.color.design_default_color_primary))
@@ -101,4 +121,5 @@ class SignUpActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
 }

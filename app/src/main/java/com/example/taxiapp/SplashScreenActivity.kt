@@ -22,6 +22,7 @@ class SplashScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
+        var intent: Intent
         sPref = getSharedPreferences("TaxiService", Context.MODE_PRIVATE)
         savedToken = sPref!!.getString("auth_token", "")
         savedLogin = sPref!!.getString("login", "")
@@ -41,7 +42,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 try {
                     tokenCheckResponse = blockingStub.tokenCheck(tokenCheckRequest) // Запрос на создание
                     managedChannel.shutdown()
-                    val intent: Intent = if (tokenCheckResponse.isValidToken) {
+                    intent = if (tokenCheckResponse.isValidToken) {
                         Intent(applicationContext, MainActivity::class.java)
                     } else {
                         Intent(applicationContext, SignInActivity::class.java)
@@ -54,16 +55,16 @@ class SplashScreenActivity : AppCompatActivity() {
                     }
                     //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
                     managedChannel.shutdown()
-                    val intent = Intent(applicationContext, SignInActivity::class.java)
+                    intent = Intent(applicationContext, SignInActivity::class.java)
                     startActivity(intent)
                     finish()
                 }
             }
         } else {
-            val intent = Intent(applicationContext, SignInActivity::class.java)
-//            val intent = Intent(applicationContext, MainActivity::class.java) // For test
+            intent = Intent(applicationContext, SignInActivity::class.java)
             startActivity(intent)
             finish()
         }
+
     }
 }

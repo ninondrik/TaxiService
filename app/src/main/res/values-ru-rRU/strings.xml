@@ -34,4 +34,9 @@
     <string name="rate_ride">Оцените поездку.</string>
     <string name="feedback">Отзыв</string>
     <string name="send_feedback">Отправить отзыв</string>
+    <string name="phone_number_without_7">Номер телефона без +7</string>
+    <string name="weak_password">Слабый пароль</string>
+    <string name="use_latin_and_next_symbols">Используйте латиницу и следующие символы: $@!%*#?&amp;</string>
+    <string name="invalid_field_value">Неверное значение поля</string>
+    <string name="too_short_password">Слишком короткий пароль</string>
 </resources>

@@ -35,4 +35,9 @@
     <string name="rate_ride">Rate the trip.</string>
     <string name="feedback">Feedback</string>
     <string name="send_feedback">Send feedback</string>
+    <string name="phone_number_without_7">Phone number without +7</string>
+    <string name="invalid_field_value">Invalid field value</string>
+    <string name="weak_password">Weak password</string>
+    <string name="use_latin_and_next_symbols">Use latin and next symbols: $@!%*#?&amp;</string>
+    <string name="too_short_password">Too short password</string>
 </resources>

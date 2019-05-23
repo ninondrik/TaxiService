@@ -14,8 +14,8 @@
         android:layout_alignBottom="@id/phoneEdit"
         android:layout_marginStart="20dp"
         android:gravity="center"
+        app:ccp_customMasterCountries="RU"
         app:ccp_defaultNameCode="RU"
-        app:ccp_enablePhoneAutoFormatter="true"
         app:ccp_hideNameCode="true" />
 
     <EditText
@@ -26,11 +26,12 @@
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="8dp"
         android:layout_toEndOf="@id/countryCodePicker"
-        android:digits="1234567890+-()"
+        android:digits="1234567890"
         android:ems="10"
-        android:hint="@string/phone_number"
+        android:hint="@string/phone_number_without_7"
         android:importantForAutofill="no"
-        android:inputType="phone" />
+        android:inputType="phone"
+        android:maxLength="10" />
 
 
     <EditText
@@ -42,6 +43,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginRight="20dp"
         android:ems="10"
+        android:maxLength="128"
         android:hint="@string/password"
         android:importantForAutofill="no"
         android:inputType="textPassword" />
