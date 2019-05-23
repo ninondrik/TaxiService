@@ -3,6 +3,7 @@ package com.example.taxiapp
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
@@ -106,7 +107,7 @@ class SignInActivity : AppCompatActivity() {
     }
 
     fun changeForm(view: View) {
-        redirectToRegister.setTextColor(resources.getColor(R.color.design_default_color_primary))
+        redirectToRegister.setTextColor(ContextCompat.getColor(this@SignInActivity, R.color.design_default_color_primary))
         val intent = Intent(applicationContext, SignUpActivity::class.java)
         startActivity(intent)
         finish()

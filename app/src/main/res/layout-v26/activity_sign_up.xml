@@ -16,8 +16,8 @@
         android:layout_marginBottom="14dp"
         android:ems="10"
         android:hint="@string/name"
-        android:inputType="textPersonName"
-        tools:ignore="Autofill" />
+        android:importantForAutofill="no"
+        android:inputType="textPersonName" />
 
     <com.rilixtech.CountryCodePicker
         android:id="@+id/countryCodePicker"
@@ -42,9 +42,9 @@
         android:digits="1234567890"
         android:ems="10"
         android:hint="@string/phone_number_without_7"
+        android:importantForAutofill="no"
         android:inputType="phone"
-        android:maxLength="10"
-        tools:ignore="Autofill" />
+        android:maxLength="10" />
 
     <EditText
         android:id="@+id/passwordEdit"
@@ -56,9 +56,9 @@
         android:layout_marginBottom="14dp"
         android:ems="10"
         android:hint="@string/password"
+        android:importantForAutofill="no"
         android:inputType="textPassword"
         android:maxLength="128"
-        tools:ignore="Autofill"
 
         />
 
@@ -73,8 +73,7 @@
         android:autofillHints="@string/email"
         android:ems="10"
         android:hint="@string/email"
-        android:inputType="textEmailAddress"
-        tools:targetApi="O" />
+        android:inputType="textEmailAddress" />
 
     <TextView
         android:id="@+id/textView"

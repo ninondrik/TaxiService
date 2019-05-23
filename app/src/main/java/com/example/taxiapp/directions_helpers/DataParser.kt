@@ -9,47 +9,47 @@ import java.util.*
 
 /**
  * Created by Vishal on 10/20/2018.
+ * Edited by anonlatte on 23/05/2019
  */
 
 internal class DataParser {
+    var routeData: String = ""
+
     fun parse(jObject: JSONObject): List<List<HashMap<String, String>>> {
 
         val routes = ArrayList<List<HashMap<String, String>>>()
         val jRoutes: JSONArray
-        var jLegs: JSONArray
+        val jLegs: JSONArray
         var jSteps: JSONArray
         try {
             jRoutes = jObject.getJSONArray("routes")
-            /* Traversing all routes */
-            for (i in 0 until jRoutes.length()) {
-                jLegs = (jRoutes.get(i) as JSONObject).getJSONArray("legs")
-                val path = ArrayList<HashMap<String, String>>()
-                /* Traversing all legs */
-                for (j in 0 until jLegs.length()) {
-                    jSteps = (jLegs.get(j) as JSONObject).getJSONArray("steps")
+            /* Traversing only one route */
+            jLegs = jRoutes.getJSONObject(0).getJSONArray("legs")
+            routeData = jLegs.getJSONObject(0).getJSONObject("distance").getInt("value").toString()
+            routeData += " " + jLegs.getJSONObject(0).getJSONObject("duration").getDouble("value")
+            val path = ArrayList<HashMap<String, String>>()
+            /* Traversing all legs */
+            for (j in 0 until jLegs.length()) {
+                jSteps = jLegs.getJSONObject(j).getJSONArray("steps")
 
-                    /* Traversing all steps */
-                    for (k in 0 until jSteps.length()) {
-                        val polyline: String = ((jSteps.get(k) as JSONObject).get("polyline") as JSONObject).get("points") as String
-                        val list = decodePoly(polyline)
+                /* Traversing all steps */
+                for (k in 0 until jSteps.length()) {
+                    val polyline: String = jSteps.getJSONObject(k).getJSONObject("polyline").getString("points")
+                    val list = decodePoly(polyline)
 
-                        /* Traversing all points */
-                        for (l in list.indices) {
-                            val hm = HashMap<String, String>()
-                            hm["lat"] = java.lang.Double.toString(list[l].latitude)
-                            hm["lng"] = java.lang.Double.toString(list[l].longitude)
-                            path.add(hm)
-                        }
+                    /* Traversing all points */
+                    for (l in list.indices) {
+                        val hm = HashMap<String, String>()
+                        hm["lat"] = java.lang.Double.toString(list[l].latitude)
+                        hm["lng"] = java.lang.Double.toString(list[l].longitude)
+                        path.add(hm)
                     }
-                    routes.add(path)
                 }
+                routes.add(path)
             }
-
         } catch (e: JSONException) {
             e.printStackTrace()
-        } catch (ignored: Exception) {
         }
-
         return routes
     }
 

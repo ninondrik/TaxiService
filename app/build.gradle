@@ -8,7 +8,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.taxiapp"
-        minSdkVersion 28
+        minSdkVersion 24
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -31,6 +31,10 @@ android {
         }
     }
     productFlavors {
+    }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
     }
 }
 
@@ -95,5 +99,6 @@ dependencies {
     implementation 'com.google.android.gms:play-services-places:16.1.0'
     implementation 'com.google.android.libraries.places:places:1.1.0'
 
-    implementation 'com.github.joielechong:countrycodepicker:2.3.0' // For phone country codes
+    // For phone country codes
+    implementation 'com.github.joielechong:countrycodepicker:2.3.0'
 }

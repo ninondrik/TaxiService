@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.AsyncTask
 import android.util.Log
+import com.example.taxiapp.MainActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import org.json.JSONObject
@@ -14,12 +15,14 @@ import java.util.*
  * Created by Vishal on 10/20/2018.
  */
 
-internal class PointsParser(mContext: Context, private val directionMode: String) : AsyncTask<String, Int, List<List<HashMap<String, String>>>>() {
+internal class PointsParser(mContext: Context, private val directionMode: String) :
+        AsyncTask<String, Int, List<List<HashMap<String, String>>>>() {
     private val taskCallback: TaskLoadedCallback = mContext as TaskLoadedCallback
+
+    private var routeData: String = ""
 
     // Parsing the data in non-ui thread
     override fun doInBackground(vararg jsonData: String): List<List<HashMap<String, String>>>? {
-
         val jObject: JSONObject
         var routes: List<List<HashMap<String, String>>>? = null
 
@@ -31,6 +34,7 @@ internal class PointsParser(mContext: Context, private val directionMode: String
 
             // Starts parsing data
             routes = parser.parse(jObject)
+            routeData = parser.routeData
             Log.d("myLog", "Executing routes")
             Log.d("myLog", routes.toString())
 
@@ -76,6 +80,7 @@ internal class PointsParser(mContext: Context, private val directionMode: String
         if (lineOptions != null) {
             //mMap.addPolyline(lineOptions);
             taskCallback.onTaskDone(lineOptions)
+            MainActivity.setRouteData(routeData) // Write distance and time to MainActivity
         } else {
             Log.d("myLog", "without PolyLines drawn")
         }

@@ -29,7 +29,7 @@
         android:digits="1234567890"
         android:ems="10"
         android:hint="@string/phone_number_without_7"
-        tools:ignore="Autofill"
+        android:importantForAutofill="no"
         android:inputType="phone"
         android:maxLength="10" />
 
@@ -43,10 +43,10 @@
         android:layout_marginTop="24dp"
         android:layout_marginRight="20dp"
         android:ems="10"
-        android:maxLength="128"
         android:hint="@string/password"
-        tools:ignore="Autofill"
-        android:inputType="textPassword" />
+        android:importantForAutofill="no"
+        android:inputType="textPassword"
+        android:maxLength="128" />
 
     <Button
         android:id="@+id/loginButton"
@@ -70,12 +70,12 @@
         android:layout_marginTop="8dp"
         android:layout_marginRight="20dp"
         android:clickable="true"
+        android:focusable="true"
         android:gravity="center"
         android:linksClickable="true"
         android:onClick="changeForm"
         android:text="@string/not_registered"
         android:textColorLink="@color/colorPrimary"
-        android:focusable="true"
         android:textSize="18sp" />
 
 </RelativeLayout>

@@ -2,7 +2,6 @@
     <string name="app_name" translatable="false">Taxi App</string>
     <string name="email" translatable="false">Email</string>
     <string name="name">Name</string>
-    <string name="phone_number">Phone number</string>
     <string name="email_hint">Fill email to get order receipt and newsletters</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
@@ -39,5 +38,4 @@
     <string name="invalid_field_value">Invalid field value</string>
     <string name="weak_password">Weak password</string>
     <string name="use_latin_and_next_symbols">Use latin and next symbols: $@!%*#?&amp;</string>
-    <string name="too_short_password">Too short password</string>
 </resources>

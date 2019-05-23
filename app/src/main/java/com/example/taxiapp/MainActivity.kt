@@ -56,16 +56,15 @@ import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 
 
-/*
-* Class for return statement
-* By default status of order is false
-* And response is null
-*/
-
 class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         OnCameraIdleListener, OnCameraMoveStartedListener, TaskLoadedCallback {
 
-    class CheckCabRideStatus(var cabRideStatus: Boolean? = false, var checkCabRideResponse: CheckCabRideStatusResponse? = null)
+    /*
+    * Class for return statement
+    * By default status of order is false
+    * And response is null
+    */
+    private class CheckCabRideStatus(var cabRideStatus: Boolean? = false, var checkCabRideResponse: CheckCabRideStatusResponse? = null)
 
     private var sPref: SharedPreferences? = null
     private var orderForAnother: Boolean = false
@@ -89,7 +88,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     private var destinationMarker: Marker? = null
     private var currentPolyline: Polyline? = null
 
-    // A default location (Sydney, Australia) and default zoom to use when location permission is
+    // A default location and default zoom to use when location permission is
     // not granted.
     private val mDefaultLocation = LatLng(56.835974, 60.614522)
     private var mLocationPermissionGranted: Boolean = false
@@ -160,6 +159,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         progressBar!!.visibility = View.GONE
         addressTextView!!.setText(R.string.driver_is_coming)
         changeAddress!!.text = checkCabRideResponse!!.brandName + ' ' + checkCabRideResponse.modelName + ", " + checkCabRideResponse.color + ", " + checkCabRideResponse.licensePlate + ", " + checkCabRideResponse.firstName
+        // TODO add time and distance to info
     }
 
     fun makeOrderOptions(view: View) {
@@ -224,7 +224,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         optionsDialog!!.dismiss()
         wishesDialog!!.dismiss()
         orderButton!!.setText(R.string.cancel_order)
-        orderButton!!.background = resources.getDrawable(R.color.quantum_vanillaredA100)
+        orderButton!!.background = ContextCompat.getDrawable(this@MainActivity, R.color.quantum_vanillaredA100)
         orderButton!!.setOnClickListener {
             stopFindingCab()
         }
@@ -244,7 +244,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             changeAddress!!.setText(R.string.change_address)
             startPlaceSearch.view!!.visibility = View.VISIBLE
             orderButton.setText(R.string.make_order)
-            orderButton!!.background = resources.getDrawable(R.color.primary_material_light)
+            orderButton!!.background = ContextCompat.getDrawable(this@MainActivity, R.color.default_button_material_light)
             orderButton.setOnClickListener {
                 makeOrderOptions(it)
             }
@@ -619,6 +619,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     companion object {
+        @JvmStatic
+        fun setRouteData(routeData: String) {
+            if (routeData.isNotEmpty()) {
+                val routeDataArray = routeData.split(' ')
+                routeDistance = routeDataArray[0].toInt()
+                routeTime = routeDataArray[1].toDouble()
+                Log.v("FetchURL", routeDistance.toString() + " " + routeTime)
+            }
+        }
+
+        private var routeTime: Double? = null
+        private var routeDistance: Int? = null
 
         // Keys for storing activity state.
         private const val KEY_CAMERA_POSITION = "camera_position"

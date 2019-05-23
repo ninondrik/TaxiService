@@ -61,7 +61,7 @@ class Validation(private val activity: AppCompatActivity) {
             // Minimal length check
             if (length < 6) {
                 editText.setBackgroundColor(activity.getColor(R.color.quantum_vanillaredA400))
-                editText.error = activity.getString(R.string.too_short_password)
+                editText.error = activity.getString(R.string.weak_password)
                 return false
             }
             var strengthPass = 0

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent">
 
     <Button
@@ -19,7 +18,7 @@
         android:layout_marginTop="14dp"
         android:ems="10"
         android:hint="@string/comment_for_driver"
-        tools:ignore="Autofill"
+        android:importantForAutofill="no"
         android:inputType="textPersonName" />
 
     <CheckedTextView

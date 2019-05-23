@@ -5,7 +5,6 @@
     <string name="register">Зарегистрироваться</string>
     <string name="email_hint">Заполните email для получения чеков и новостной рассылки</string>
     <string name="name">Имя</string>
-    <string name="phone_number">Номер телефона</string>
     <string name="agree_terms_privacy">Нажимая кнопку зарегистрироваться, вы соглашаетесь с нашими &lt;a href=\"http://www.google.com\">Условиями &amp; Соглашением&lt;/a>, и &lt;a href=\"http://www.google.com\">Политикой конфиденциальности&lt;/a></string>
     <string name="for_registered_users">Я уже зарегистрирован в сервисе.</string>
     <string name="internet_connection">Нет интернет соединения!</string>
@@ -38,5 +37,4 @@
     <string name="weak_password">Слабый пароль</string>
     <string name="use_latin_and_next_symbols">Используйте латиницу и следующие символы: $@!%*#?&amp;</string>
     <string name="invalid_field_value">Неверное значение поля</string>
-    <string name="too_short_password">Слишком короткий пароль</string>
 </resources>
