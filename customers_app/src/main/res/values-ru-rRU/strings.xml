@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="register">Зарегистрироваться</string>
+    <string name="email_hint">Заполните email для получения чеков и новостной рассылки</string>
+    <string name="name">Имя</string>
+    <string name="agree_terms_privacy">Нажимая кнопку зарегистрироваться, вы соглашаетесь с нашими &lt;a href=\"http://www.google.com\">Условиями &amp; Соглашением&lt;/a>, и &lt;a href=\"http://www.google.com\">Политикой конфиденциальности&lt;/a></string>
+    <string name="for_registered_users">Я уже зарегистрирован в сервисе.</string>
+    <string name="not_registered">Я ещё не зарегистрирован.</string>
+    <string name="address">Адрес</string>
+    <string name="change_address">Изменить адрес</string>
+    <string name="make_order">Оформить заказ</string>
+    <string name="entrance">Подъезд</string>
+    <string-array name="pay_type">
+        <item>Наличные</item>
+    </string-array>
+    <string name="destination">Куда</string>
+    <string name="wishes">Пожелания</string>
+    <string name="car_delivery">Подача через 10 минут</string>
+    <string name="comment_for_driver">Комментарий для водителя</string>
+    <string name="order_for_another_men">Заказ другому человеку</string>
+    <string name="ready">Готово</string>
+    <string name="cancel_order">Отменить поездку</string>
+    <string name="driver_is_coming">Водитель в пути</string>
+    <string name="finding_driver">Поиск водителя…</string>
+    <string name="rate_ride">Оцените поездку.</string>
+    <string name="feedback">Отзыв</string>
+    <string name="send_feedback">Отправить отзыв</string>
+    <string name="phone_number_without_7">Номер телефона без +7</string>
+    <string name="use_latin_and_next_symbols">Используйте латиницу и следующие символы: $@!%*#?&amp;</string>
+
+    <string name="warning_address_not_found">Адрес не был найден</string>
+    <string name="warning_unable_to_locate">Не удается найти место</string>
+    <string name="warning_weak_password">Слабый пароль</string>
+
+    <string name="error_internet_connection">Нет интернет соединения!</string>
+    <string name="error_wrong_data">Неверный логин или пароль</string>
+    <string name="error_invalid_token">Неправильный токен</string>
+    <string name="error_message_server">Ошибка сервера</string>
+    <string name="error_invalid_value">Неверное значение поля</string>
+</resources>

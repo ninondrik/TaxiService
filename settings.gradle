@@ -1,1 +1,1 @@
-include ':app'
+include ':customers_app', ':drivers_app'

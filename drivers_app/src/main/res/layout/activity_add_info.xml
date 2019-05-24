@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddInfoActivity">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:context=".AddInfoActivity">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/passportTextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp">
+
+            <com.github.pinball83.maskededittext.MaskedEditText
+                android:id="@+id/passportEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="14dp"
+                android:hint="@string/passport_data"
+                android:inputType="number"
+                android:maxLength="11"
+                app:mask="**** ******"
+                app:notMaskedSymbol="*"
+                app:replacementChar="#"
+                tools:ignore="Autofill" />
+        </android.support.design.widget.TextInputLayout>
+
+
+        <Button
+            android:id="@+id/loadPassportImageButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/passportTextInputLayout"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="14dp"
+            android:hint="@string/load_passport_image" />
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/drivingLicenseTextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/loadPassportImageButton"
+            android:layout_marginTop="14dp">
+
+            <com.github.pinball83.maskededittext.MaskedEditText
+                android:id="@+id/drivingLicenseEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="14dp"
+                android:ems="10"
+                android:hint="@string/driving_license"
+                android:inputType="number"
+                android:maxLength="12"
+                app:mask="** ** ******"
+                app:notMaskedSymbol="*"
+                app:replacementChar="#"
+                tools:ignore="Autofill" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/expiryDateTextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/drivingLicenseTextInputLayout"
+            android:layout_marginTop="14dp">
+
+            <com.github.pinball83.maskededittext.MaskedEditText
+                android:id="@+id/expiryDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="14dp"
+                android:ems="10"
+                android:hint="@string/license_expiry_date"
+                android:inputType="date"
+                app:mask="**.**.****"
+                app:notMaskedSymbol="*"
+                app:replacementChar="#"
+                tools:ignore="Autofill" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/loadDrivingLicenceButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/expiryDateTextInputLayout"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="14dp"
+            android:hint="@string/load_driving_licence_image" />
+
+        <Button
+            android:id="@+id/loadSTSButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/loadDrivingLicenceButton"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="14dp"
+            android:hint="@string/load_sts" />
+
+        <Button
+            android:id="@+id/loadCarImageButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/loadSTSButton"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="14dp"
+            android:hint="@string/load_car_image" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/loadCarImageButton"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:text="@string/register" />
+
+
+    </RelativeLayout>
+</ScrollView>
