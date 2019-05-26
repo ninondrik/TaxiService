@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import io.grpc.ManagedChannelBuilder
+import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import kotlinx.android.synthetic.main.activity_sign_up.*
 import kotlinx.coroutines.GlobalScope
@@ -107,6 +108,8 @@ class SignUpActivity : AppCompatActivity() {
                 } catch (e: StatusRuntimeException) {
                     if (e.status.cause is java.net.ConnectException) {
                         runOnUiThread { Toast.makeText(this@SignUpActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    } else if (e.status.code == Status.UNKNOWN.code) {
+                        runOnUiThread { Toast.makeText(this@SignUpActivity, R.string.user_is_already_exists, Toast.LENGTH_LONG).show() }
                     }
                     //logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
                     managedChannel.shutdown()

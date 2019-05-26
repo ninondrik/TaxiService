@@ -39,4 +39,6 @@
     <string name="error_invalid_token">Неправильный токен</string>
     <string name="error_message_server">Ошибка сервера</string>
     <string name="error_invalid_value">Неверное значение поля</string>
+    <string name="trip_price">Стоимость поездки</string>
+    <string name="trip_duration">Длительность поездки</string>
 </resources>

@@ -1,18 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <TextView
+        android:id="@+id/tripDuration"
+        android:layout_width="@android:dimen/thumbnail_width"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/trip_duration"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+
+    <TextView
+        android:id="@+id/tripPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tripDuration"
+        android:layout_alignTop="@id/tripDuration"
+        android:layout_alignBottom="@id/tripDuration"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@id/tripDuration"
+        android:gravity="center"
+        android:text="@string/trip_price"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/addressEdit"
         android:layout_width="wrap_content"
+        android:layout_below="@id/tripPrice"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="@string/address"
-        tools:ignore="Autofill"
-        android:inputType="text" />
+        android:inputType="text"
+        tools:ignore="Autofill" />
 
     <EditText
         android:id="@+id/entranceEdit"
@@ -24,9 +50,9 @@
         android:layout_toEndOf="@id/addressEdit"
         android:ems="10"
         android:hint="@string/entrance"
-        tools:ignore="Autofill"
         android:inputType="numberDecimal"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        tools:ignore="Autofill" />
 
     <fragment
         android:id="@+id/destinationEdit"
@@ -36,8 +62,8 @@
         android:layout_below="@+id/addressEdit"
         android:layout_marginTop="8dp"
         android:hint="@string/destination"
-        tools:ignore="Autofill"
-        android:inputType="text" />
+        android:inputType="text"
+        tools:ignore="Autofill" />
 
     <Button
         android:id="@+id/wishesButton"

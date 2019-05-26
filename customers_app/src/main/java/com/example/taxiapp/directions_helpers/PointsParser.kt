@@ -4,10 +4,12 @@ package com.example.taxiapp.directions_helpers
 import android.content.Context
 import android.graphics.Color
 import android.os.AsyncTask
+import android.text.SpannableStringBuilder
 import android.util.Log
 import com.example.taxiapp.MainActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.android.synthetic.main.activity_order_options.*
 import org.json.JSONObject
 import java.util.*
 
@@ -18,6 +20,7 @@ import java.util.*
 internal class PointsParser(mContext: Context, private val directionMode: String) :
         AsyncTask<String, Int, List<List<HashMap<String, String>>>>() {
     private val taskCallback: TaskLoadedCallback = mContext as TaskLoadedCallback
+    private val context: Context = mContext
 
     private var routeData: String = ""
 
@@ -80,7 +83,22 @@ internal class PointsParser(mContext: Context, private val directionMode: String
         if (lineOptions != null) {
             //mMap.addPolyline(lineOptions);
             taskCallback.onTaskDone(lineOptions)
-            MainActivity.setRouteData(routeData) // Write distance and time to MainActivity
+
+            if (routeData.isNotEmpty()) {
+                val activity = context as MainActivity
+                val routeDataArray = routeData.split(' ')
+                val routeDistance = Math.ceil(routeDataArray[0].toDouble() / 1000)
+                val routeTime = Math.ceil(routeDataArray[1].toDouble() / 60)
+                val routePrice = if (routeDistance >= 1.4) {
+                    89.0 + routeDistance * 9.0
+                } else {
+                    89.0
+                }
+                activity.runOnUiThread {
+                    activity.optionsDialog?.tripDuration!!.text = SpannableStringBuilder(routeTime.toString() + "min")
+                    activity.optionsDialog?.tripPrice!!.text = SpannableStringBuilder(routePrice.toString() + '₽')
+                }
+            }
         } else {
             Log.d("myLog", "without PolyLines drawn")
         }

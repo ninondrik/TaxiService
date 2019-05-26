@@ -66,16 +66,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     */
     private class CheckCabRideStatus(var cabRideStatus: Boolean? = false, var checkCabRideResponse: CheckCabRideStatusResponse? = null)
 
+    private var tripPriceTextView: TextView? = null
+    private var tripDurationTextView: TextView? = null
+    private var addressTextView: TextView? = null
+    private var pinImageView: ImageView? = null
+    var optionsDialog: AlertDialog? = null
+    private var ridingEndDialog: AlertDialog? = null
+    private var wishesDialog: AlertDialog? = null
+    private var addressSearch: AutocompleteSupportFragment? = null
+
     private var sPref: SharedPreferences? = null
     private var orderForAnother: Boolean = false
     private var pendingOrder: Boolean = false
-    private var addressTextView: TextView? = null
-    private var addressSearch: AutocompleteSupportFragment? = null
-    private var pinImageView: ImageView? = null
     private var mMap: GoogleMap? = null
-    private var optionsDialog: AlertDialog? = null
-    private var ridingEndDialog: AlertDialog? = null
-    private var wishesDialog: AlertDialog? = null
     private var errorMessage: String? = ""
     private var commentText: String? = ""
 
@@ -90,7 +93,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
     // A default location and default zoom to use when location permission is
     // not granted.
-    private val mDefaultLocation = LatLng(56.835974, 60.614522)
+    private val mDefaultLocation = LatLng(56.889035, 60.248630)
     private var mLocationPermissionGranted: Boolean = false
     private val isGeoDisabled: Boolean
         get() {
@@ -105,6 +108,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         pinImageView = pinImage
         addressTextView = address
 
@@ -137,6 +141,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             addressSearch!!.view!!.visibility = View.VISIBLE
         }
         addressSearch!!.view!!.alpha = 0F
+
     }
 
     private fun showOrdersEndScreen() {
@@ -169,6 +174,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         optionsDialog!!.addressEdit.setText(addressTextView!!.text)
         optionsDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         optionsDialog!!.window!!.setGravity(Gravity.BOTTOM)
+        tripPriceTextView = optionsDialog!!.tripPrice
+        tripDurationTextView = optionsDialog!!.tripDuration
+        optionsDialog!!.addressEdit.setOnClickListener {
+            pinImageView!!.visibility = View.VISIBLE
+            with(mMap) {
+                this!!.setOnCameraIdleListener(this@MainActivity)
+                this.setOnCameraMoveStartedListener(this@MainActivity)
+            }
+        }
 
         optionsDialog!!.wishesButton.setOnClickListener {
             wishesDialog!!.show()
@@ -197,14 +211,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         (destinationEdit as AutocompleteSupportFragment).setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 destinationMarker = mMap!!.addMarker(MarkerOptions().position(place.latLng!!))
+                currentMarker!!.isVisible = true
                 with(mMap) {
                     this!!.setOnCameraIdleListener(null)
                     this.setOnCameraMoveStartedListener(null)
                 }
+                pinImageView!!.visibility = View.INVISIBLE
                 mMap!!.moveCamera(CameraUpdateFactory
                         .newLatLngZoom(currentMarker!!.position, DEFAULT_ZOOM.toFloat()))
                 (destinationEdit as AutocompleteSupportFragment).setText(place.address)
                 FetchURL(this@MainActivity).execute(getUrl(currentMarker!!.position, destinationMarker!!.position, "driving"), "driving")
+
             }
 
             override fun onError(status: Status) {
@@ -382,21 +399,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         val token = AutocompleteSessionToken.newInstance()
         val bounds: RectangularBounds = when {
             currentMarker != null -> RectangularBounds.newInstance(
-                    LatLng(currentMarker!!.position.latitude - 0.2, currentMarker!!.position.longitude + 0.6),
-                    LatLng(currentMarker!!.position.latitude + 0.2, currentMarker!!.position.longitude - 0.6)
+                    LatLng(currentMarker!!.position.latitude - 0.5, currentMarker!!.position.longitude - 1),
+                    LatLng(currentMarker!!.position.latitude + 0.5, currentMarker!!.position.longitude + 1)
             )
             mLastKnownLocation != null -> RectangularBounds.newInstance(
-                    LatLng(mLastKnownLocation!!.latitude - 0.2, mLastKnownLocation!!.longitude + 0.6),
-                    LatLng(mLastKnownLocation!!.latitude + 0.2, mLastKnownLocation!!.longitude - 0.6)
+                    LatLng(mLastKnownLocation!!.latitude - 0.5, mLastKnownLocation!!.longitude - 1),
+                    LatLng(mLastKnownLocation!!.latitude + 0.5, mLastKnownLocation!!.longitude + 1)
             )
             else -> RectangularBounds.newInstance(
-                    LatLng(mDefaultLocation.latitude - 0.2, mDefaultLocation.longitude + 0.6),
-                    LatLng(mDefaultLocation.latitude + 0.2, mDefaultLocation.longitude - 0.6)
+                    LatLng(mDefaultLocation.latitude - 0.5, mDefaultLocation.longitude - 1),
+                    LatLng(mDefaultLocation.latitude + 0.5, mDefaultLocation.longitude + 1)
             )
         }
         autocompleteSupportFragment.setPlaceFields(Arrays.asList(Place.Field.ADDRESS, Place.Field.NAME, Place.Field.LAT_LNG))
         val request = FindAutocompletePredictionsRequest.builder()
-                .setLocationBias(bounds)
+                .setLocationRestriction(bounds)
                 .setCountry("RU")
                 .setTypeFilter(TypeFilter.ADDRESS)
                 .setSessionToken(token)
@@ -555,6 +572,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
                 }
             }
         }
+
+        autocompleteFragmentSetup(startPlaceSearch as AutocompleteSupportFragment)
     }
 
     override fun onCameraIdle() {
@@ -592,11 +611,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
                 } else {
                     addressTextView!!.text = (address.thoroughfare + ',' + address.subThoroughfare)
                 }
-                currentMarker!!.remove()
+                currentMarker!!.isVisible = false
             }
-//            var address: String =  addresses[0].getAddressLine(0)
         }
-        autocompleteFragmentSetup(startPlaceSearch as AutocompleteSupportFragment)
     }
 
     override fun onCameraMoveStarted(p0: Int) {
@@ -620,20 +637,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+
     companion object {
-        @JvmStatic
-        fun setRouteData(routeData: String) {
-            if (routeData.isNotEmpty()) {
-                val routeDataArray = routeData.split(' ')
-                routeDistance = routeDataArray[0].toInt()
-                routeTime = routeDataArray[1].toDouble()
-                Log.v("FetchURL", routeDistance.toString() + " " + routeTime)
-            }
-        }
-
-        private var routeTime: Double? = null
-        private var routeDistance: Int? = null
-
         // Keys for storing activity state.
         private const val KEY_CAMERA_POSITION = "camera_position"
         private const val KEY_LOCATION = "location"
