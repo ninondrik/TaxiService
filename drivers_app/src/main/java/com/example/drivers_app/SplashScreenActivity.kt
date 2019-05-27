@@ -39,7 +39,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
                 val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
                 val tokenCheckRequest = TokenCheckRequest.newBuilder()
-                        .setApi("v1")
+                        .setApi(getString(R.string.api_version))
                         .setUserType(1)
                         .setAuthToken(savedToken)
                         .setLogin(savedLogin)

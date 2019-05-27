@@ -2,13 +2,14 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".SignUpActivity">
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".SignUpActivity">
+        android:orientation="vertical">
 
         <EditText
             android:id="@+id/nameEdit"
@@ -20,20 +21,19 @@
             android:layout_marginBottom="14dp"
             android:ems="10"
             android:hint="@string/name"
-            android:inputType="textPersonName"
+            android:inputType="text"
             tools:ignore="Autofill" />
 
         <EditText
             android:id="@+id/surnameEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/nameEdit"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="14dp"
             android:ems="10"
             android:hint="@string/surname"
-            android:inputType="textPersonName"
+            android:inputType="text"
             tools:ignore="Autofill" />
 
 
@@ -41,20 +41,18 @@
             android:id="@+id/patronymicEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/surnameEdit"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="14dp"
             android:ems="10"
             android:hint="@string/patronymic"
-            android:inputType="textPersonName"
+            android:inputType="text"
             tools:ignore="Autofill" />
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/birthDateInputLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/patronymicEdit">
+            android:layout_height="wrap_content">
 
             <com.github.pinball83.maskededittext.MaskedEditText
                 android:id="@+id/birthDate"
@@ -74,39 +72,42 @@
 
         </android.support.design.widget.TextInputLayout>
 
-        <com.rilixtech.CountryCodePicker
-            android:id="@+id/countryCodePicker"
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/phoneEdit"
-            android:layout_alignBottom="@id/phoneEdit"
-            android:layout_marginStart="20dp"
-            android:gravity="center"
-            app:ccp_customMasterCountries="RU"
-            app:ccp_defaultNameCode="RU"
-            app:ccp_hideNameCode="true" />
+            android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/phoneEdit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/birthDateInputLayout"
-            android:layout_marginTop="14dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="14dp"
-            android:layout_toEndOf="@id/countryCodePicker"
-            android:digits="1234567890"
-            android:ems="10"
-            android:hint="@string/phone_number_without_7"
-            android:inputType="phone"
-            android:maxLength="10"
-            tools:ignore="Autofill" />
+            <com.rilixtech.CountryCodePicker
+                android:id="@+id/countryCodePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/phoneEdit"
+                android:layout_alignBottom="@id/phoneEdit"
+                android:layout_marginStart="20dp"
+                android:gravity="center"
+                app:ccp_customMasterCountries="RU"
+                app:ccp_defaultNameCode="RU"
+                app:ccp_hideNameCode="true" />
+
+            <EditText
+                android:id="@+id/phoneEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="14dp"
+                android:layout_toEndOf="@id/countryCodePicker"
+                android:digits="1234567890"
+                android:ems="10"
+                android:hint="@string/phone_number_without_7"
+                android:inputType="phone"
+                android:maxLength="10"
+                tools:ignore="Autofill" />
+        </RelativeLayout>
 
         <EditText
             android:id="@+id/passwordEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/phoneEdit"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="14dp"
@@ -114,15 +115,12 @@
             android:hint="@string/password"
             android:inputType="textPassword"
             android:maxLength="128"
-            tools:ignore="Autofill"
-
-            />
+            tools:ignore="Autofill" />
 
         <EditText
             android:id="@+id/emailEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/passwordEdit"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="4dp"
@@ -134,34 +132,28 @@
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/emailEdit"
-            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="14dp"
-            android:gravity="center"
             android:text="@string/email_hint" />
 
-
         <Button
-            android:id="@+id/registerButton"
+            android:id="@+id/continueRegistrationButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textView"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:onClick="startRegistration"
-            android:text="@string/register" />
-
+            android:onClick="continueRegistration"
+            android:text="@string/continue_registration" />
 
         <TextView
             android:id="@+id/agree_terms_privacy"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/registerButton"
-            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:clickable="true"
@@ -174,25 +166,21 @@
             android:textAlignment="center"
             android:textColorLink="@color/colorPrimary" />
 
-
         <TextView
             android:id="@+id/redirectToLogin"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_below="@id/agree_terms_privacy"
-            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="20dp"
             android:clickable="true"
             android:focusable="true"
-            android:gravity="bottom"
             android:linksClickable="true"
             android:onClick="changeForm"
             android:text="@string/for_registered_users"
             android:textColorLink="@color/colorPrimary"
             android:textSize="18sp" />
-
-    </RelativeLayout>
+    </LinearLayout>
 </ScrollView>

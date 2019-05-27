@@ -29,14 +29,23 @@ message Driver {
     string partronymic = 4;
     google.protobuf.Timestamp birthDate = 5;
     string phoneNumber = 6;
-    string drivingLicenseNumber = 7;
-    google.protobuf.Timestamp expiryDate = 8;
-    bool working = 9;
-    string email = 10;
-    string password = 11;
-    string authToken = 12;
-    google.protobuf.Timestamp create_time = 13;
-    google.protobuf.Timestamp update_time = 14;
+    bool working = 7;
+    string email = 8;
+    string password = 9;
+    string authToken = 10;
+    google.protobuf.Timestamp create_time = 11;
+    google.protobuf.Timestamp update_time = 12;
+}
+
+message DriverDocuments {
+    int32 id = 1;
+    int32 driverId = 2;
+    string passportNumber = 3;
+    bytes passportImage = 4;
+    string drivingLicenseNumber = 5;
+    google.protobuf.Timestamp expiryDate = 6;
+    bytes drivingLicenseImage = 7;
+    bytes stsPhoto = 8;
 }
 
 message Dispatcher {
@@ -50,6 +59,12 @@ message Dispatcher {
     string authToken = 8;
     google.protobuf.Timestamp create_time = 9;
     google.protobuf.Timestamp update_time = 10;
+}
+
+message Color {
+    int32 id = 1;
+    int32 code = 2;
+    string description = 3;
 }
 
 message Cab {
@@ -70,8 +85,8 @@ message CarModel {
 message CarBrand {
     int32 id = 1;
     string brandName = 2;
-    int32 carBrandId = 3;
 }
+
 
 message CabRide {
     int32 id = 1;
@@ -170,6 +185,50 @@ message DeleteCustomerResponse {
 }
 
 
+message CreateDriverRequest {
+    string api = 1;
+    Driver driver = 2;
+    DriverDocuments driverDocuments = 3;
+}
+
+message CreateDriverResponse {
+    string api = 1;
+    int32 id = 2;
+    string authToken = 3;
+}
+
+message ReadDriverRequest {
+    string api = 1;
+    Driver driver = 2;
+}
+
+message ReadDriverResponse {
+    string api = 1;
+    Driver driver = 2;
+    DriverDocuments driverDocuments = 3;
+}
+
+message UpdateDriverRequest {
+    string api = 1;
+    Driver driver = 2;
+    DriverDocuments driverDocuments = 3;
+}
+
+message UpdateDriverResponse {
+    string api = 1;
+    int32 updated = 2;
+}
+
+message DeleteDriverRequest {
+    string api = 1;
+    Driver driver = 2;
+}
+
+message DeleteDriverResponse {
+    string api = 1;
+    int32 deleted = 2;
+}
+
 message CreateCabRideRequest {
     string api = 1;
     CabRide cabRide = 2;
@@ -191,7 +250,6 @@ message UpdateCabRideResponse {
     string api = 1;
     CabRide cabRide = 2;
 }
-
 
 message DeleteCabRideRequest {
     string api = 1;
@@ -223,19 +281,59 @@ message CheckCabRideStatusResponse {
     int32 rideStatus = 9;
 }
 
+message ReadAllCarBrandsRequest {
+    string api = 1;
+}
+
+message ReadAllCarBrandsResponse {
+    string api = 1;
+    repeated CarBrand carBrand = 2;
+}
+
+message ReadAllCarModelsRequest {
+    string api = 1;
+    int32 carBrandId = 2;
+}
+
+message ReadAllCarModelsResponse {
+    string api = 1;
+    repeated CarModel carModels = 2;
+}
+
+
+message ReadAllColorsRequest {
+    string api = 1;
+}
+
+message ReadAllColorsResponse {
+    string api = 1;
+    repeated Color color = 2;
+}
+
 service taxiService {
-    // customer CRUD
     rpc LoginUser (LoginRequest) returns (LoginResponse);
     rpc TokenCheck (TokenCheckRequest) returns (TokenCheckResponse);
 
+    // customer CRUD
     rpc CreateCustomer (CreateCustomerRequest) returns (CreateCustomerResponse);
     rpc ReadCustomer (ReadCustomerRequest) returns (ReadCustomerResponse);
     rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
     rpc DeleteCustomer (DeleteCustomerRequest) returns (DeleteCustomerResponse);
 
+    // driver CRUD
+    rpc CreateDriver (CreateDriverRequest) returns (CreateDriverResponse);
+    rpc ReadDriver (ReadDriverRequest) returns (ReadDriverResponse);
+    rpc UpdateDriver (UpdateDriverRequest) returns (UpdateDriverResponse);
+    rpc DeleteDriver (DeleteDriverRequest) returns (DeleteDriverResponse);
+
     rpc CreateCabRide (CreateCabRideRequest) returns (CreateCabRideResponse);
     rpc DeleteCabRide (DeleteCabRideRequest) returns (DeleteCabRideResponse);
-    // TODO: rpc UpdateCabRide (UpdateCabRideRequest) returns (UpdateCabRideResponse)
+    rpc UpdateCabRide (UpdateCabRideRequest) returns (UpdateCabRideResponse);
 
     rpc CheckCabRideStatus (CheckCabRideStatusRequest) returns (CheckCabRideStatusResponse);
+
+    rpc ReadAllCarBrands (ReadAllCarBrandsRequest) returns (ReadAllCarBrandsResponse);
+    rpc ReadAllCarModels (ReadAllCarModelsRequest) returns (ReadAllCarModelsResponse);
+
+    rpc GetColors (ReadAllColorsRequest) returns (ReadAllColorsResponse);
 }

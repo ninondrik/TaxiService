@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ForDebugging().turnOnStrictMode() // TODO: test app
+        ForDebugging().turnOnStrictMode()
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -148,7 +148,6 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
 
     @SuppressLint("SetTextI18n")
     private fun setLiveCabRideInfo(checkCabRideResponse: CheckCabRideStatusResponse?) {
-        findCab()
         progressBar!!.visibility = View.GONE
         addressTextView!!.setText(R.string.driver_is_coming)
         changeAddress!!.text = checkCabRideResponse!!.brandName + ' ' + checkCabRideResponse.modelName + ", " + checkCabRideResponse.color + ", " + checkCabRideResponse.licensePlate + ", " + checkCabRideResponse.firstName
@@ -211,24 +210,6 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
 */
     }
 
-    private fun findCab() {
-        pinImageView!!.visibility = View.GONE
-        progressBar!!.visibility = View.VISIBLE
-        changeAddress!!.text = ""
-        startPlaceSearch.view!!.visibility = View.GONE
-        optionsDialog!!.dismiss()
-        wishesDialog!!.dismiss()
-        orderButton!!.setText(R.string.cancel_order)
-        orderButton!!.background = ContextCompat.getDrawable(this@MainActivity, R.color.quantum_vanillaredA100)
-        orderButton!!.setOnClickListener {
-            stopFindingCab()
-        }
-        with(mMap) {
-            this!!.setOnCameraIdleListener(null)
-            this.setOnCameraMoveStartedListener(null)
-        }
-        addressTextView?.setText(R.string.finding_driver)
-    }
 
     private fun stopFindingCab() {
 /*
@@ -261,7 +242,7 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
         val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
         val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
         val checkCabRideStatusRequest = CheckCabRideStatusRequest.newBuilder()
-                .setApi("v1")
+                .setApi(getString(R.string.api_version))
                 .setCabRideId(sPref!!.getInt("orderedCabRideId", -1))
                 .setAuthToken(sPref!!.getString("auth_token", ""))
                 .build()
@@ -465,7 +446,6 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
                         setLiveCabRideInfo(cabRideStatus.checkCabRideResponse) // Set riding condition
                     }
                 } else {
-                    findCab() // Set finding condition
                 }
             }
         }

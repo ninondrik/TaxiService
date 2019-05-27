@@ -10,29 +10,21 @@ import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.Toast
-import com.example.taxiapp.CreateCustomerRequest
-import com.example.taxiapp.CreateCustomerResponse
-import com.example.taxiapp.Customer
-import com.example.taxiapp.taxiServiceGrpc
-import io.grpc.ManagedChannelBuilder
-import io.grpc.StatusRuntimeException
+import com.github.pinball83.maskededittext.MaskedEditText
 import kotlinx.android.synthetic.main.activity_sign_up.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 class SignUpActivity : AppCompatActivity() {
 
+    private var phoneText: String? = null
     private var validation: Validation? = null
     private var nameEditText: EditText? = null
     private var surnameEditText: EditText? = null
     private var patronymicEditText: EditText? = null
     private var phoneEditText: EditText? = null
-    private var birthDateEditText: EditText? = null
+    private var birthDateEditText: MaskedEditText? = null
     private var emailEditText: EditText? = null
     private var passwordEditText: EditText? = null
 
@@ -40,7 +32,6 @@ class SignUpActivity : AppCompatActivity() {
         ForDebugging().turnOnStrictMode()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
-        addDriversInfo()
 
         nameEditText = nameEdit
         surnameEditText = surnameEdit
@@ -51,7 +42,14 @@ class SignUpActivity : AppCompatActivity() {
         passwordEditText = passwordEdit
         validation = Validation(this@SignUpActivity)
 
-//        countryCodePicker.registerPhoneNumberTextView(phoneEditText)
+        val datePickerDialog = DatePickerDialog(this@SignUpActivity)
+        datePickerDialog.setOnDateSetListener { _, year, month, dayOfMonth ->
+            birthDateEditText!!.text = SpannableStringBuilder("${dayOfMonth.toString().padStart(2, '0')}.${month.toString().padStart(2, '0')}.$year") // format: MM.DD.Y
+        }
+        datePickerDialog.setOnDismissListener {
+            validation!!.isDateValid(birthDateEditText)
+        }
+
         val policy = Html.fromHtml(getString(R.string.agree_terms_privacy), Html.FROM_HTML_MODE_LEGACY)
         val termsOfUse = agree_terms_privacy
         termsOfUse.text = policy
@@ -87,13 +85,13 @@ class SignUpActivity : AppCompatActivity() {
 
         birthDate.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                pickDate()
+                datePickerDialog.show()
             }
         }
 
     }
 
-    fun startRegistration(view: View) {
+    fun continueRegistration(view: View) {
         val fieldsValidation = mapOf(
                 "name" to validation!!.isFieldValid(nameEditText),
                 "surname" to validation!!.isFieldValid(surnameEditText),
@@ -103,65 +101,29 @@ class SignUpActivity : AppCompatActivity() {
                 "password" to validation!!.isPasswordValid(passwordEditText, true),
                 "email" to validation!!.isEmailValid(emailEditText)
         )
-        if (!fieldsValidation.values.contains(false)) {
+        if (!fieldsValidation.values.contains(true)) {
+//        TODO: change after debug: if (!fieldsValidation.values.contains(false)) {
+            phoneText = countryCodePicker.selectedCountryCode + phoneEditText!!.text
             addDriversInfo()
         }
     }
 
     private fun addDriversInfo() {
         val intent = Intent(applicationContext, AddInfoActivity::class.java)
+        intent.putExtra("name", nameEditText!!.text.toString())
+        intent.putExtra("surname", surnameEditText!!.text.toString())
+        intent.putExtra("patronymic", patronymicEditText!!.text.toString())
+        intent.putExtra("birthDate", birthDateEditText!!.text.toString())
+        intent.putExtra("phone", phoneText)
+        intent.putExtra("password", passwordEditText!!.text.toString())
+        intent.putExtra("email", emailEditText!!.text.toString())
         startActivity(intent)
-    }
-
-    private fun registerDriver() {
-        GlobalScope.launch {
-            val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
-            val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
-            val phoneText = countryCodePicker.selectedCountryCode + phoneEditText!!.text
-            val customer = Customer.newBuilder()
-                    .setName(nameEditText!!.text.toString())
-                    .setPhoneNumber(phoneText)
-                    .setEmail(emailEditText!!.text.toString())
-                    .setPassword(passwordEditText!!.text.toString())
-                    .build()
-            val createCustomerRequest = CreateCustomerRequest.newBuilder()
-                    .setApi("v1")
-                    .setCustomer(customer)
-                    .build()
-            val createCustomerResponse: CreateCustomerResponse
-            try {
-                createCustomerResponse = blockingStub.createCustomer(createCustomerRequest) // Запрос на создание
-                Log.v("Response", createCustomerResponse.authToken)
-                managedChannel.shutdown()
-                val intent = Intent(applicationContext, SignInActivity::class.java)
-                startActivity(intent)
-                finish()
-            } catch (e: StatusRuntimeException) {
-                if (e.status.cause is java.net.ConnectException) {
-                    runOnUiThread { Toast.makeText(this@SignUpActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
-                }
-                //logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
-                managedChannel.shutdown()
-            }
-        }
-
     }
 
     fun changeForm(view: View) {
-        redirectToLogin.setTextColor(ContextCompat.getColor(this@SignUpActivity, R.color.design_default_color_primary))
+        redirectToLogin.setTextColor(ContextCompat.getColor(this@SignUpActivity, R.color.colorAccent))
         val intent = Intent(applicationContext, SignInActivity::class.java)
         startActivity(intent)
         finish()
-    }
-
-    private fun pickDate() {
-        val datePickerDialog = DatePickerDialog(this@SignUpActivity)
-        datePickerDialog.setOnDateSetListener { _, year, month, dayOfMonth ->
-            birthDateEditText!!.text = SpannableStringBuilder("${dayOfMonth.toString().padStart(2, '0')}.${month.toString().padStart(2, '0')}.$year") // format: MM.DD.Y
-        }
-        datePickerDialog.setOnDismissListener {
-            validation!!.isDateValid(birthDateEditText)
-        }
-        datePickerDialog.show()
     }
 }

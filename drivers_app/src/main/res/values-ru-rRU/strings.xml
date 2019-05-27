@@ -49,4 +49,16 @@
     <string name="load_sts">Загрузить скан СТС</string>
     <string name="driving_license">Водительские права</string>
     <string name="passport_data">Паспортные данные:</string>
+    <string name="color">Цвет</string>
+    <string name="continue_registration">Продолжить регистрацию</string>
+    <string name="dialog_message_add_auto">Добавить авто сейчас или позже?</string>
+    <string name="dialog_message_add_later">Позже</string>
+    <string name="dialog_message_add_now">Добавить сейчас</string>
+    <string name="error_cannot_load_car_brands">Невозможно загрузить марки машин</string>
+    <string name="error_cannot_load_car_models">Невозможно загрузить модели машин</string>
+    <string name="error_failed">Неудача!</string>
+    <string name="find_car_model">Поиск моделей машин</string>
+    <string name="license_plate">Гос номер</string>
+    <string name="image_saved">Изображение сохранено</string>
+    <string name="user_is_already_exists">Пользователь уже существует</string>
 </resources>

@@ -2,6 +2,7 @@ package com.example.drivers_app
 
 import android.support.v7.app.AppCompatActivity
 import android.widget.EditText
+import com.github.pinball83.maskededittext.MaskedEditText
 import java.util.regex.Pattern
 
 class Validation(private val activity: AppCompatActivity) {
@@ -128,10 +129,12 @@ class Validation(private val activity: AppCompatActivity) {
         }
     }
 
-    fun isDateValid(dateEdit: EditText?): Boolean {
+    // TODO: check expiryDate is greater than now
+    // TODO: check birthDate is greater than 18
+    fun isDateValid(dateEdit: MaskedEditText?): Boolean {
         val pattern = Pattern.compile("^\\d{2}.\\d{2}.\\d{4}$")
         val text = dateEdit!!.text
-        return if (text.isNotEmpty() && pattern.matcher(text).matches()) {
+        return if (text!!.isNotEmpty() && pattern.matcher(text).matches()) {
             dateEdit.error = null
             true
         } else {
@@ -140,14 +143,27 @@ class Validation(private val activity: AppCompatActivity) {
         }
     }
 
-    fun isPassportValid(passportEdit: EditText?): Boolean {
+    fun isPassportValid(passportEdit: MaskedEditText?): Boolean {
         val pattern = Pattern.compile("^\\d{4}\\s\\d{6}$")
         val text = passportEdit!!.text
-        return if (text.isNotEmpty() && pattern.matcher(text).matches()) {
+        return if (text!!.isNotEmpty() && pattern.matcher(text).matches()) {
             passportEdit.error = null
             true
         } else {
             passportEdit.error = activity.getString(R.string.error_invalid_value)
+            false
+        }
+
+    }
+
+    fun isDrivingLicenseValid(drivingLicenseEdit: MaskedEditText?): Boolean {
+        val pattern = Pattern.compile("^\\d{2}\\s\\d{2}\\s\\d{6}$")
+        val text = drivingLicenseEdit!!.text
+        return if (text!!.isNotEmpty() && pattern.matcher(text).matches()) {
+            drivingLicenseEdit.error = null
+            true
+        } else {
+            drivingLicenseEdit.error = activity.getString(R.string.error_invalid_value)
             false
         }
 

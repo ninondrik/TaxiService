@@ -62,5 +62,17 @@
     <string name="load_driving_licence_image">Load driving license image</string>
     <string name="load_sts">Load certificate of registration of the vehicle</string>
     <string name="load_car_image">Load car image</string>
+    <string name="image_saved">Image saved</string>
+    <string name="error_failed">Failed!</string>
+    <string name="continue_registration">Continue registration</string>
+    <string name="user_is_already_exists">User is already exists</string>
+    <string name="dialog_message_add_auto">Add automobile now or later?</string>
+    <string name="dialog_message_add_now">Add now</string>
+    <string name="dialog_message_add_later">Later</string>
+    <string name="error_cannot_load_car_brands">Can\'t load car brands</string>
+    <string name="license_plate">License plate</string>
+    <string name="color">Color</string>
+    <string name="find_car_model">Find car model</string>
+    <string name="error_cannot_load_car_models">Can\'t load car models</string>
 
 </resources>
