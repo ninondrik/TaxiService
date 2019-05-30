@@ -66,6 +66,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     */
     private class CheckCabRideStatus(var cabRideStatus: Boolean? = false, var checkCabRideResponse: CheckCabRideStatusResponse? = null)
 
+    private var isTimerActive: Boolean = false
+    private var timer: Timer? = null
+    private var timerTask: TimerTask? = null
+
     private var tripPriceTextView: TextView? = null
     private var tripDurationTextView: TextView? = null
     private var addressTextView: TextView? = null
@@ -116,9 +120,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
         addressSearch = startPlaceSearch as AutocompleteSupportFragment?
 
-        optionsDialog = AlertDialog.Builder(this@MainActivity).setView(R.layout.activity_order_options).create()
-        wishesDialog = AlertDialog.Builder(this@MainActivity).setView(R.layout.activity_order_wishes).create()
-        ridingEndDialog = AlertDialog.Builder(this@MainActivity).setView(R.layout.activity_order_info).create()
+        optionsDialog = AlertDialog.Builder(this@MainActivity).setView(this.layoutInflater.inflate(R.layout.activity_order_options, null)).create()
+        wishesDialog = AlertDialog.Builder(this@MainActivity).setView(this.layoutInflater.inflate(R.layout.activity_order_wishes, null)).create()
+        ridingEndDialog = AlertDialog.Builder(this@MainActivity).setView(this.layoutInflater.inflate(R.layout.activity_order_info, null)).create()
 
         geocoder = Geocoder(this, Locale.getDefault())
 
@@ -142,12 +146,53 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         }
         addressSearch!!.view!!.alpha = 0F
 
+        startTimer()
+    }
+
+    private fun startTimer() {
+        if (!isTimerActive) {
+            timer = Timer()
+            timerTask = object : TimerTask() {
+                override fun run() {
+                    if (sPref!!.getInt("orderedCabRideId", -1) != -1) {
+                        val cabRideStatus = checkCabRideStatus()
+                        if (cabRideStatus.cabRideStatus!!) { // Is order is active
+                            if (cabRideStatus.checkCabRideResponse!!.firstName.isNotEmpty()) { // Has driver accepted an order?
+                                if (cabRideStatus.checkCabRideResponse!!.rideStatus == 2) { // Is order ended?
+                                    runOnUiThread { showOrdersEndScreen() }
+                                    stopTimer()
+                                } else {
+                                    runOnUiThread { setLiveCabRideInfo(cabRideStatus.checkCabRideResponse) } // Set riding condition
+                                }
+                            }
+                        } else {
+                            stopTimer()
+                        }
+                    } else {
+                        stopTimer()
+                    }
+                }
+            }
+            timer!!.scheduleAtFixedRate(timerTask, 0, 5000)
+            isTimerActive = true
+        }
+    }
+
+    private fun stopTimer() {
+        if (isTimerActive) {
+            timer!!.cancel()
+            isTimerActive = false
+        }
     }
 
     private fun showOrdersEndScreen() {
         ridingEndDialog!!.show()
         ridingEndDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         ridingEndDialog!!.window!!.setGravity(Gravity.BOTTOM)
+        addressTextView!!.text = getString(R.string.address)
+        changeAddress!!.text = getString(R.string.change_address)
+        orderButton!!.text = getString(R.string.make_order)
+        orderButton!!.background = ContextCompat.getDrawable(this@MainActivity, R.color.quantum_googgreen)
         ridingEndDialog!!.setOnDismissListener {
             sPref!!.edit().putInt("orderedCabRideId", -1).apply()
         }
@@ -235,6 +280,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    // FIXME: timer issue -> android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
     private fun findCab() {
         pinImageView!!.visibility = View.GONE
         progressBar!!.visibility = View.VISIBLE
@@ -248,8 +294,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             stopFindingCab()
         }
         with(mMap) {
-            this!!.setOnCameraIdleListener(null)
-            this.setOnCameraMoveStartedListener(null)
+            this?.setOnCameraIdleListener(null)
+            this?.setOnCameraMoveStartedListener(null)
         }
         addressTextView?.setText(R.string.finding_driver)
     }
@@ -297,8 +343,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         }
         cabRide.build()
         val cabRideRequest = CreateCabRideRequest.newBuilder()
-                .setApi("v1")
+                .setApi(getString(R.string.api_version))
                 .setCabRide(cabRide)
+                .setPrice(tripPriceTextView!!.text.toString().split('.')[0]) // TODO check price set
                 .setAuthToken(sPref!!.getString("auth_token", ""))
                 .build()
         val cabRideResponse: CreateCabRideResponse
@@ -306,6 +353,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             cabRideResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).createCabRide(cabRideRequest) // Запрос на создание
             sPref!!.edit().putInt("orderedCabRideId", cabRideResponse.cabRideId).apply() // OrderId saving into SharedPreferences
             managedChannel.shutdown()
+            startTimer()
             return true
         } catch (e: StatusRuntimeException) {
             // Check exceptions
@@ -330,7 +378,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
         val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
         val deleteCabRideRequest = DeleteCabRideRequest.newBuilder()
-                .setApi("v1")
+                .setApi(getString(R.string.api_version))
                 .setCabRideId(sPref!!.getInt("orderedCabRideId", -1))
                 .setCustomerId(sPref!!.getInt("customer_id", -1))
                 .setAuthToken(sPref!!.getString("auth_token", ""))
@@ -368,7 +416,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
         val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
         val checkCabRideStatusRequest = CheckCabRideStatusRequest.newBuilder()
-                .setApi("v1")
+                .setApi(getString(R.string.api_version))
                 .setCabRideId(sPref!!.getInt("orderedCabRideId", -1))
                 .setAuthToken(sPref!!.getString("auth_token", ""))
                 .build()
@@ -572,7 +620,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
                 }
             }
         }
-
         autocompleteFragmentSetup(startPlaceSearch as AutocompleteSupportFragment)
     }
 

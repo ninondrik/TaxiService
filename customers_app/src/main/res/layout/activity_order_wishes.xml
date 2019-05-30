@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <Button
         android:id="@+id/readyWishesButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:layout_gravity="end"
         android:text="@string/ready" />
 
     <EditText
         android:id="@+id/commentEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/readyWishesButton"
         android:layout_marginTop="14dp"
         android:ems="10"
         android:hint="@string/comment_for_driver"
-        tools:ignore="Autofill"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        tools:ignore="Autofill" />
 
     <CheckedTextView
         android:id="@+id/pendingOrderCheck"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/commentEdit"
         android:layout_marginTop="8dp"
         android:checkMark="?android:attr/listChoiceIndicatorMultiple"
         android:checked="false"
@@ -37,11 +36,10 @@
         android:id="@+id/orderForAnotherCheck"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/pendingOrderCheck"
         android:layout_marginTop="8dp"
         android:checkMark="?android:attr/listChoiceIndicatorMultiple"
         android:checked="false"
         android:text="@string/order_for_another_men"
         android:textSize="18sp" />
 
-</RelativeLayout>
+</LinearLayout>

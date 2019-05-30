@@ -94,7 +94,7 @@ class SignUpActivity : AppCompatActivity() {
                         .setPassword(passwordEditText!!.text.toString())
                         .build()
                 val createCustomerRequest = CreateCustomerRequest.newBuilder()
-                        .setApi("v1")
+                        .setApi(getString(R.string.api_version))
                         .setCustomer(customer)
                         .build()
                 val createCustomerResponse: CreateCustomerResponse
@@ -121,7 +121,7 @@ class SignUpActivity : AppCompatActivity() {
 
 
     fun changeForm(view: View) {
-        redirectToLogin.setTextColor(ContextCompat.getColor(this@SignUpActivity, R.color.design_default_color_primary))
+        redirectToLogin.setTextColor(ContextCompat.getColor(this@SignUpActivity, R.color.colorAccent))
         val intent = Intent(applicationContext, SignInActivity::class.java)
         startActivity(intent)
         finish()

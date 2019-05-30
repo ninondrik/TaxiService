@@ -1,100 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:showDividers="end">
 
-
-    <TextView
-        android:id="@+id/tripDuration"
-        android:layout_width="@android:dimen/thumbnail_width"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/trip_duration"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-
-    <TextView
-        android:id="@+id/tripPrice"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tripDuration"
-        android:layout_alignTop="@id/tripDuration"
-        android:layout_alignBottom="@id/tripDuration"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@id/tripDuration"
-        android:gravity="center"
-        android:text="@string/trip_price"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/addressEdit"
-        android:layout_width="wrap_content"
-        android:layout_below="@id/tripPrice"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="@string/address"
-        android:inputType="text"
-        tools:ignore="Autofill" />
+        <TextView
+            android:id="@+id/tripDuration"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="start"
+            android:gravity="center"
+            android:text="@string/trip_duration"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
-    <EditText
-        android:id="@+id/entranceEdit"
+
+        <TextView
+            android:id="@+id/tripPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tripDuration"
+            android:layout_alignTop="@id/tripDuration"
+            android:layout_alignBottom="@id/tripDuration"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:layout_toEndOf="@id/tripDuration"
+            android:gravity="center"
+            android:text="@string/trip_price"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignTop="@id/addressEdit"
-        android:layout_alignBottom="@id/addressEdit"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@id/addressEdit"
-        android:ems="10"
-        android:hint="@string/entrance"
-        android:inputType="numberDecimal"
-        android:textSize="14sp"
-        tools:ignore="Autofill" />
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/addressEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:ems="10"
+            android:hint="@string/address"
+            android:inputType="text"
+            tools:ignore="Autofill" />
+
+        <EditText
+            android:id="@+id/entranceEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:gravity="center"
+            android:hint="@string/entrance"
+            android:inputType="numberDecimal"
+            android:textSize="14sp"
+            tools:ignore="Autofill" />
+    </LinearLayout>
 
     <fragment
         android:id="@+id/destinationEdit"
         android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/addressEdit"
+        android:layout_gravity="center"
         android:layout_marginTop="8dp"
         android:hint="@string/destination"
         android:inputType="text"
         tools:ignore="Autofill" />
 
-    <Button
-        android:id="@+id/wishesButton"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/destinationEdit"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="8dp"
-        android:text="@string/wishes" />
-
-    <Spinner
-        android:id="@+id/payTypeSpinner"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/destinationEdit"
-        android:layout_alignBottom="@id/wishesButton"
-        android:layout_marginTop="8dp"
-        android:layout_toEndOf="@+id/wishesButton"
-        android:entries="@array/pay_type" />
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/wishesButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:text="@string/wishes" />
+
+        <Spinner
+            android:id="@+id/payTypeSpinner"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:entries="@array/pay_type" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/makeOrderButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/wishesButton"
-        android:layout_alignStart="@+id/wishesButton"
-        android:layout_alignEnd="@+id/payTypeSpinner"
-        android:layout_marginLeft="30dp"
         android:layout_marginTop="14dp"
-        android:layout_marginRight="30dp"
+        android:layout_marginBottom="8dp"
         android:background="#FFEB3B"
         android:text="@string/make_order" />
 
-</RelativeLayout>
+</LinearLayout>

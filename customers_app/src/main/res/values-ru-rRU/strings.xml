@@ -41,4 +41,6 @@
     <string name="error_invalid_value">Неверное значение поля</string>
     <string name="trip_price">Стоимость поездки</string>
     <string name="trip_duration">Длительность поездки</string>
+    <string name="user_is_already_exists">Пользователь уже существует</string>
+    <string name="trip_distance">Расстояние поездки</string>
 </resources>

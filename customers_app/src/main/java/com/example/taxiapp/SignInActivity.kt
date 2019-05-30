@@ -68,7 +68,7 @@ class SignInActivity : AppCompatActivity() {
                 val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
                 val phoneText = countryCodePicker.selectedCountryCode + phoneEditText!!.text
                 val loginRequest = LoginRequest.newBuilder()
-                        .setApi("v1")
+                        .setApi(getString(R.string.api_version))
                         .setLogin(phoneText)
                         .setPassword(passwordEditText!!.text.toString())
                         .setUserType(0)
@@ -109,7 +109,7 @@ class SignInActivity : AppCompatActivity() {
     }
 
     fun changeForm(view: View) {
-        redirectToRegister.setTextColor(ContextCompat.getColor(this@SignInActivity, R.color.design_default_color_primary))
+        redirectToRegister.setTextColor(ContextCompat.getColor(this@SignInActivity, R.color.colorAccent))
         val intent = Intent(applicationContext, SignUpActivity::class.java)
         startActivity(intent)
         finish()

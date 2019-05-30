@@ -11,6 +11,7 @@ import io.grpc.StatusRuntimeException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class SplashScreenActivity : AppCompatActivity() {
     private var savedToken: String? = null
@@ -35,14 +36,14 @@ class SplashScreenActivity : AppCompatActivity() {
                 val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
                 val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
                 val tokenCheckRequest = TokenCheckRequest.newBuilder()
-                        .setApi("v1")
+                        .setApi(getString(R.string.api_version))
                         .setUserType(0)
                         .setAuthToken(savedToken)
                         .setLogin(savedLogin)
                         .build()
                 val tokenCheckResponse: TokenCheckResponse
                 try {
-                    tokenCheckResponse = blockingStub.tokenCheck(tokenCheckRequest) // Запрос на создание
+                    tokenCheckResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).tokenCheck(tokenCheckRequest) // Запрос на создание
                     managedChannel.shutdown()
                     intent = if (tokenCheckResponse.isValidToken) {
                         Intent(applicationContext, MainActivity::class.java)

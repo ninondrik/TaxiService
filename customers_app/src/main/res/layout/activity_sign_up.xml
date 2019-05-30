@@ -3,11 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         tools:context=".SignUpActivity">
 
         <EditText
@@ -23,38 +24,41 @@
             android:inputType="textPersonName"
             tools:ignore="Autofill" />
 
-        <com.rilixtech.CountryCodePicker
-            android:id="@+id/countryCodePicker"
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/phoneEdit"
-            android:layout_alignBottom="@id/phoneEdit"
-            android:layout_marginStart="20dp"
-            android:gravity="center"
-            app:ccp_customMasterCountries="RU"
-            app:ccp_defaultNameCode="RU"
-            app:ccp_hideNameCode="true" />
+            android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/phoneEdit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/nameEdit"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="14dp"
-            android:layout_toEndOf="@id/countryCodePicker"
-            android:digits="1234567890"
-            android:ems="10"
-            android:hint="@string/phone_number_without_7"
-            android:inputType="phone"
-            android:maxLength="10"
-            tools:ignore="Autofill" />
+            <com.rilixtech.CountryCodePicker
+                android:id="@+id/countryCodePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/phoneEdit"
+                android:layout_alignBottom="@id/phoneEdit"
+                android:layout_marginStart="20dp"
+                android:gravity="center"
+                app:ccp_customMasterCountries="RU"
+                app:ccp_defaultNameCode="RU"
+                app:ccp_hideNameCode="true" />
+
+            <EditText
+                android:id="@+id/phoneEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="14dp"
+                android:layout_toEndOf="@id/countryCodePicker"
+                android:digits="1234567890"
+                android:ems="10"
+                android:hint="@string/phone_number_without_7"
+                android:inputType="phone"
+                android:maxLength="10"
+                tools:ignore="Autofill" />
+        </RelativeLayout>
 
         <EditText
             android:id="@+id/passwordEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/phoneEdit"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="14dp"
@@ -62,15 +66,12 @@
             android:hint="@string/password"
             android:inputType="textPassword"
             android:maxLength="128"
-            tools:ignore="Autofill"
-
-            />
+            tools:ignore="Autofill" />
 
         <EditText
             android:id="@+id/emailEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/passwordEdit"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="4dp"
@@ -84,8 +85,6 @@
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/emailEdit"
-            android:layout_centerHorizontal="true"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="14dp"
@@ -96,7 +95,6 @@
             android:id="@+id/registerButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textView"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:onClick="register"
@@ -107,8 +105,6 @@
             android:id="@+id/agree_terms_privacy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/registerButton"
-            android:layout_centerHorizontal="true"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:clickable="true"
@@ -126,8 +122,7 @@
             android:id="@+id/redirectToLogin"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_below="@id/agree_terms_privacy"
-            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginRight="20dp"
@@ -141,5 +136,5 @@
             android:textColorLink="@color/colorPrimary"
             android:textSize="18sp" />
 
-    </RelativeLayout>
+    </LinearLayout>
 </ScrollView>

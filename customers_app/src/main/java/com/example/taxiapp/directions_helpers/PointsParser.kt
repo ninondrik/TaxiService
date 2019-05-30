@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.AsyncTask
 import android.text.SpannableStringBuilder
 import android.util.Log
+import android.view.View
 import com.example.taxiapp.MainActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
@@ -84,6 +85,7 @@ internal class PointsParser(mContext: Context, private val directionMode: String
             //mMap.addPolyline(lineOptions);
             taskCallback.onTaskDone(lineOptions)
 
+            // Set textViews values
             if (routeData.isNotEmpty()) {
                 val activity = context as MainActivity
                 val routeDataArray = routeData.split(' ')
@@ -97,6 +99,8 @@ internal class PointsParser(mContext: Context, private val directionMode: String
                 activity.runOnUiThread {
                     activity.optionsDialog?.tripDuration!!.text = SpannableStringBuilder(routeTime.toString() + "min")
                     activity.optionsDialog?.tripPrice!!.text = SpannableStringBuilder(routePrice.toString() + '₽')
+                    activity.optionsDialog?.tripDuration!!.visibility = View.VISIBLE
+                    activity.optionsDialog?.tripPrice!!.visibility = View.VISIBLE
                 }
             }
         } else {

@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:showDividers="end">
 
     <TextView
         android:id="@+id/feedbackTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_marginStart="14dp"
         android:layout_marginEnd="14dp"
+        android:layout_gravity="center"
         android:text="@string/rate_ride" />
 
     <RatingBar
         android:id="@+id/ratingBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/feedbackTextView"
-        android:layout_centerHorizontal="true"
         android:layout_marginStart="14dp"
         android:layout_marginTop="8dp"
+        android:layout_gravity="center"
+        android:numStars="5"
         android:layout_marginEnd="14dp" />
 
     <EditText
         android:id="@+id/feedbackEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/ratingBar"
-        android:layout_centerHorizontal="true"
         android:layout_marginStart="14dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="14dp"
         android:ems="10"
+        android:layout_gravity="center"
         android:gravity="center"
         android:hint="@string/feedback"
         tools:ignore="Autofill"
@@ -42,10 +43,9 @@
         android:id="@+id/feedbackButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/feedbackEdit"
-        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
         android:layout_marginStart="14dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="14dp"
         android:text="@string/send_feedback" />
-</RelativeLayout>
+</LinearLayout>

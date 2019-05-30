@@ -1,58 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".SignInActivity">
 
-    <com.rilixtech.CountryCodePicker
-        android:id="@+id/countryCodePicker"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/phoneEdit"
-        android:layout_alignBottom="@id/phoneEdit"
-        android:layout_marginStart="20dp"
-        android:gravity="center"
-        app:ccp_customMasterCountries="RU"
-        app:ccp_defaultNameCode="RU"
-        app:ccp_hideNameCode="true" />
+        android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/phoneEdit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="8dp"
-        android:layout_toEndOf="@id/countryCodePicker"
-        android:digits="1234567890"
-        android:ems="10"
-        android:hint="@string/phone_number_without_7"
-        tools:ignore="Autofill"
-        android:inputType="phone"
-        android:maxLength="10" />
+        <com.rilixtech.CountryCodePicker
+            android:id="@+id/countryCodePicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/phoneEdit"
+            android:layout_alignBottom="@id/phoneEdit"
+            android:layout_marginStart="20dp"
+            android:gravity="center"
+            app:ccp_customMasterCountries="RU"
+            app:ccp_defaultNameCode="RU"
+            app:ccp_hideNameCode="true" />
 
+        <EditText
+            android:id="@+id/phoneEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="200dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="8dp"
+            android:layout_toEndOf="@id/countryCodePicker"
+            android:digits="1234567890"
+            android:ems="10"
+            android:hint="@string/phone_number_without_7"
+            android:inputType="phone"
+            android:maxLength="10"
+            tools:ignore="Autofill" />
+    </RelativeLayout>
 
     <EditText
         android:id="@+id/passwordEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/phoneEdit"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="24dp"
         android:layout_marginRight="20dp"
         android:ems="10"
-        android:maxLength="128"
         android:hint="@string/password"
-        tools:ignore="Autofill"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:maxLength="128"
+        tools:ignore="Autofill" />
 
     <Button
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/passwordEdit"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="24dp"
         android:layout_marginRight="20dp"
@@ -65,17 +68,16 @@
         android:id="@+id/redirectToRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/loginButton"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="8dp"
         android:layout_marginRight="20dp"
         android:clickable="true"
+        android:focusable="true"
         android:gravity="center"
         android:linksClickable="true"
         android:onClick="changeForm"
         android:text="@string/not_registered"
         android:textColorLink="@color/colorPrimary"
-        android:focusable="true"
         android:textSize="18sp" />
 
-</RelativeLayout>
+</LinearLayout>
