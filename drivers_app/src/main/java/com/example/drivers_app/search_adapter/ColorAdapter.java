@@ -14,21 +14,21 @@ import com.example.drivers_app.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExampleModelAdapter extends RecyclerView.Adapter<ExampleModelAdapter.ExampleViewHolder> implements Filterable {
-    private List<ExampleItem> exampleList;
-    private List<ExampleItem> exampleListFull;
+public class ColorAdapter extends RecyclerView.Adapter<ColorAdapter.ExampleViewHolder> implements Filterable {
+    private List<ColorItem> exampleList;
+    private List<ColorItem> exampleListFull;
     private Filter exampleFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
-            List<ExampleItem> filteredList = new ArrayList<>();
+            List<ColorItem> filteredList = new ArrayList<>();
 
             if (constraint == null || constraint.length() == 0) {
                 filteredList.addAll(exampleListFull);
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
 
-                for (ExampleItem item : exampleListFull) {
-                    if (item.getText2().toLowerCase().contains(filterPattern) || item.getText1().toLowerCase().contains(filterPattern)) {
+                for (ColorItem item : exampleListFull) {
+                    if (item.getText1().toLowerCase().contains(filterPattern)) {
                         filteredList.add(item);
                     }
                 }
@@ -48,7 +48,7 @@ public class ExampleModelAdapter extends RecyclerView.Adapter<ExampleModelAdapte
         }
     };
 
-    public ExampleModelAdapter(List<ExampleItem> exampleList) {
+    public ColorAdapter(List<ColorItem> exampleList) {
         this.exampleList = exampleList;
         exampleListFull = new ArrayList<>(exampleList);
     }
@@ -56,16 +56,15 @@ public class ExampleModelAdapter extends RecyclerView.Adapter<ExampleModelAdapte
     @NonNull
     @Override
     public ExampleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_car_item,
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_color_item,
                 parent, false);
         return new ExampleViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ExampleViewHolder holder, int position) {
-        ExampleItem currentItem = exampleList.get(position);
+        ColorItem currentItem = exampleList.get(position);
         holder.textView1.setText(currentItem.getText1());
-        holder.textView2.setText(currentItem.getText2());
     }
 
     @Override
@@ -80,12 +79,10 @@ public class ExampleModelAdapter extends RecyclerView.Adapter<ExampleModelAdapte
 
     class ExampleViewHolder extends RecyclerView.ViewHolder {
         TextView textView1;
-        TextView textView2;
 
         ExampleViewHolder(View itemView) {
             super(itemView);
-            textView1 = itemView.findViewById(R.id.carModel);
-            textView2 = itemView.findViewById(R.id.carBrand);
+            textView1 = itemView.findViewById(R.id.colorItem);
         }
     }
 }

@@ -101,8 +101,7 @@ class SignUpActivity : AppCompatActivity() {
                 "password" to validation!!.isPasswordValid(passwordEditText, true),
                 "email" to validation!!.isEmailValid(emailEditText)
         )
-        if (!fieldsValidation.values.contains(true)) {
-//        TODO: change after debug: if (!fieldsValidation.values.contains(false)) {
+        if (!fieldsValidation.values.contains(false)) {
             phoneText = countryCodePicker.selectedCountryCode + phoneEditText!!.text
             addDriversInfo()
         }

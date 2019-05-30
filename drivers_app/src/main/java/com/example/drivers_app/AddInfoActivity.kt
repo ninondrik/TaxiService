@@ -20,9 +20,10 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.SearchView
 import android.widget.Toast
-import com.example.drivers_app.search_adapter.ExampleColorAdapter
-import com.example.drivers_app.search_adapter.ExampleItem
-import com.example.drivers_app.search_adapter.ExampleModelAdapter
+import com.example.drivers_app.search_adapter.CarItem
+import com.example.drivers_app.search_adapter.CarModelAdapter
+import com.example.drivers_app.search_adapter.ColorAdapter
+import com.example.drivers_app.search_adapter.ColorItem
 import com.example.taxiapp.*
 import com.github.pinball83.maskededittext.MaskedEditText
 import com.google.protobuf.ByteString
@@ -57,8 +58,8 @@ class AddInfoActivity : AppCompatActivity() {
     private var drivingLicensePhoto: ByteString? = null
     private var registrationCertificatePhoto: ByteString? = null
     private val carBrands: MutableMap<Int, String>? = mutableMapOf()
-    private val carModels: MutableList<ExampleItem> = mutableListOf()
-    private val colorsArray: MutableList<ExampleItem> = mutableListOf()
+    private val carModels: MutableList<CarItem> = mutableListOf()
+    private val colorsArray: MutableList<ColorItem> = mutableListOf()
     private var alertDialog: AlertDialog.Builder? = null
     private var searchCarDialog: AlertDialog? = null
 
@@ -203,7 +204,7 @@ class AddInfoActivity : AppCompatActivity() {
 //                carModelsArray = mutableListOf()
                 readAllCarModelsResponse = blockingStub.readAllCarModels(readAllCarModelsRequest)
                 readAllCarModelsResponse.carModelsList.forEach { carModel ->
-                    carModels.add(ExampleItem(carModel.modelName, carBrand.value))
+                    carModels.add(CarItem(carModel.modelName, carBrand.value))
                 }
 //                carModels!![carBrand.value] = carModelsArray
             }
@@ -230,7 +231,7 @@ class AddInfoActivity : AppCompatActivity() {
         try {
             readAllColorsResponse = blockingStub.getColors(readAllColorsRequest)
             readAllColorsResponse.colorList.forEach { color ->
-                colorsArray.add(ExampleItem(color.description, color.code.toString()))
+                colorsArray.add(ColorItem(color.description))
             }
 
         } catch (e: StatusRuntimeException) {
@@ -251,7 +252,7 @@ class AddInfoActivity : AppCompatActivity() {
                     setCarDialog()
                 }
                 .setNegativeButton(R.string.dialog_message_add_later) { dialog, _ ->
-                    //                    registerDriver() TODO
+                    registerDriver()
                     dialog.dismiss()
                 }
         alertDialog!!.create()
@@ -260,8 +261,8 @@ class AddInfoActivity : AppCompatActivity() {
 
     private fun setCarDialog() {
         val licensePlateEditText = setCarDialogView!!.licensePlate
-        var modelAdapter: ExampleModelAdapter? = null
-        var colorAdapter: ExampleColorAdapter? = null
+        var modelAdapter: CarModelAdapter? = null
+        var colorAdapter: ColorAdapter? = null
 
         searchButton = setCarDialogView!!.searchModel
         searchColor = setCarDialogView!!.chooseColorButton
@@ -271,22 +272,20 @@ class AddInfoActivity : AppCompatActivity() {
 
         searchButton!!.setOnClickListener {
             searchCarDialog = AlertDialog.Builder(this@AddInfoActivity).setView(searchCarDialogView).create()
-            modelAdapter = ExampleModelAdapter(carModels)
+            modelAdapter = CarModelAdapter(carModels)
             carModelRecyclerView!!.adapter = modelAdapter
             searchCarDialog!!.show()
         }
         searchColor!!.setOnClickListener {
             searchCarDialog = AlertDialog.Builder(this@AddInfoActivity).setView(searchColorDialogView).create()
-            colorAdapter = ExampleColorAdapter(colorsArray)
+            colorAdapter = ColorAdapter(colorsArray)
             carColorRecyclerView!!.adapter = colorAdapter
             searchCarDialog!!.show()
         }
 
         setCarDialog!!.setView(setCarDialogView)
-                .setMessage(R.string.dialog_message_add_auto)
                 .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                    //TODO: check empty fields
-                    if (licensePlateEditText.text.isNotEmpty() && searchColor!!.text.isNotEmpty()) {
+                    if (licensePlateEditText.text.isNotEmpty() && searchColor!!.text.isNotEmpty() && searchButton!!.text.isNotEmpty()) {
                         registerDriver()
                     }
                 }
@@ -336,6 +335,7 @@ class AddInfoActivity : AppCompatActivity() {
                 val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
                 val birthDateParse = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).parse(intent.getStringExtra("birthDate")).time
                 val expiryDateParse = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).parse(expiryDateEdit!!.text.toString()).time
+                // TODO: if car was set add it to DB
                 val driver = Driver.newBuilder()
                         .setFirstName(intent.getStringExtra("name"))
                         .setSurname(intent.getStringExtra("surname"))

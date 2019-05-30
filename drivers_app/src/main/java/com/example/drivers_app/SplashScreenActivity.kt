@@ -14,6 +14,7 @@ import io.grpc.StatusRuntimeException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class SplashScreenActivity : AppCompatActivity() {
 
@@ -46,7 +47,7 @@ class SplashScreenActivity : AppCompatActivity() {
                         .build()
                 val tokenCheckResponse: TokenCheckResponse
                 try {
-                    tokenCheckResponse = blockingStub.tokenCheck(tokenCheckRequest) // Запрос на создание
+                    tokenCheckResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).tokenCheck(tokenCheckRequest) // Запрос на создание
                     managedChannel.shutdown()
                     intent = if (tokenCheckResponse.isValidToken) {
                         Intent(applicationContext, MainActivity::class.java)

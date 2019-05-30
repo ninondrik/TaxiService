@@ -90,7 +90,7 @@ dependencies {
     implementation 'io.grpc:grpc-okhttp:1.21.0'
     implementation 'io.grpc:grpc-stub:1.21.0'
     implementation 'com.android.support:cardview-v7:28.0.0'
-    protobuf 'com.google.protobuf:protobuf-java:3.8.0-rc-1'
+    protobuf 'com.google.protobuf:protobuf-java:3.8.0'
 
     // Google maps and places API
     implementation 'com.google.maps:google-maps-services:0.9.3'

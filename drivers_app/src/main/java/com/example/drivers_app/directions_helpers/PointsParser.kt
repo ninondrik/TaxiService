@@ -3,10 +3,12 @@ package com.example.drivers_app.directions_helpers
 import android.content.Context
 import android.graphics.Color
 import android.os.AsyncTask
+import android.text.SpannableStringBuilder
 import android.util.Log
 import com.example.drivers_app.MainActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.android.synthetic.main.activity_available_order_dialog.*
 import org.json.JSONObject
 import java.util.*
 
@@ -16,6 +18,8 @@ import java.util.*
 
 internal class PointsParser(mContext: Context, private val directionMode: String) :
         AsyncTask<String, Int, List<List<HashMap<String, String>>>>() {
+    private val context: Context = mContext
+
     private val taskCallback: TaskLoadedCallback = mContext as TaskLoadedCallback
 
     private var routeData: String = ""
@@ -79,7 +83,16 @@ internal class PointsParser(mContext: Context, private val directionMode: String
         if (lineOptions != null) {
             //mMap.addPolyline(lineOptions);
             taskCallback.onTaskDone(lineOptions)
-            MainActivity.setRouteData(routeData) // Write distance and time to MainActivity
+            if (routeData.isNotEmpty()) {
+                val activity = context as MainActivity
+                val routeDataArray = routeData.split(' ')
+                val routeDistance = Math.ceil(routeDataArray[0].toDouble() / 1000)
+                val routeTime = Math.ceil(routeDataArray[1].toDouble() / 60)
+                activity.runOnUiThread {
+                    activity.availableOrderDialog?.toOfferTime!!.text = SpannableStringBuilder(routeTime.toString() + "min")
+                    activity.availableOrderDialog?.toOfferDistance!!.text = SpannableStringBuilder(routeDistance.toString() + "km")
+                }
+            }
         } else {
             Log.d("myLog", "without PolyLines drawn")
         }

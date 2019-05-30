@@ -14,20 +14,20 @@ import com.example.drivers_app.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExampleColorAdapter extends RecyclerView.Adapter<ExampleColorAdapter.ExampleViewHolder> implements Filterable {
-    private List<ExampleItem> exampleList;
-    private List<ExampleItem> exampleListFull;
+public class CarModelAdapter extends RecyclerView.Adapter<CarModelAdapter.ExampleViewHolder> implements Filterable {
+    private List<CarItem> exampleList;
+    private List<CarItem> exampleListFull;
     private Filter exampleFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
-            List<ExampleItem> filteredList = new ArrayList<>();
+            List<CarItem> filteredList = new ArrayList<>();
 
             if (constraint == null || constraint.length() == 0) {
                 filteredList.addAll(exampleListFull);
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
 
-                for (ExampleItem item : exampleListFull) {
+                for (CarItem item : exampleListFull) {
                     if (item.getText2().toLowerCase().contains(filterPattern) || item.getText1().toLowerCase().contains(filterPattern)) {
                         filteredList.add(item);
                     }
@@ -48,7 +48,7 @@ public class ExampleColorAdapter extends RecyclerView.Adapter<ExampleColorAdapte
         }
     };
 
-    public ExampleColorAdapter(List<ExampleItem> exampleList) {
+    public CarModelAdapter(List<CarItem> exampleList) {
         this.exampleList = exampleList;
         exampleListFull = new ArrayList<>(exampleList);
     }
@@ -56,14 +56,14 @@ public class ExampleColorAdapter extends RecyclerView.Adapter<ExampleColorAdapte
     @NonNull
     @Override
     public ExampleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_color_item,
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_car_item,
                 parent, false);
         return new ExampleViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ExampleViewHolder holder, int position) {
-        ExampleItem currentItem = exampleList.get(position);
+        CarItem currentItem = exampleList.get(position);
         holder.textView1.setText(currentItem.getText1());
         holder.textView2.setText(currentItem.getText2());
     }

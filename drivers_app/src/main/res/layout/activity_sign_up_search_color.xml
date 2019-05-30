@@ -16,6 +16,6 @@
         android:id="@+id/carColorItems"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/search_car_item" />
+        tools:listitem="@layout/search_color_item" />
 
 </LinearLayout>

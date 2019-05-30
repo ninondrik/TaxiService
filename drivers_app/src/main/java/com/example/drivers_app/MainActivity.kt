@@ -11,19 +11,23 @@ import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.provider.Settings
+import android.support.design.widget.NavigationView
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.View
-import android.widget.ImageView
+import android.view.Gravity
+import android.view.MenuItem
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import com.example.taxiapp.CheckCabRideStatusRequest
-import com.example.taxiapp.CheckCabRideStatusResponse
-import com.example.taxiapp.taxiServiceGrpc
-import com.google.android.gms.common.api.Status
+import com.example.drivers_app.directions_helpers.FetchURL
+import com.example.drivers_app.directions_helpers.TaskLoadedCallback
+import com.example.taxiapp.*
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -31,23 +35,39 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.RectangularBounds
-import com.google.android.libraries.places.api.model.TypeFilter
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import io.grpc.ManagedChannelBuilder
 import io.grpc.StatusRuntimeException
 import io.grpc.okhttp.internal.Platform
+import kotlinx.android.synthetic.main.activity_active_order_dialog.*
+import kotlinx.android.synthetic.main.activity_available_order_dialog.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 
-class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, GoogleMap.OnCameraMoveStartedListener, OnMapReadyCallback {
+class MainActivity : AppCompatActivity(),
+        OnMapReadyCallback,
+        NavigationView.OnNavigationItemSelectedListener,
+        TaskLoadedCallback {
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_profile -> Toast.makeText(applicationContext, "Profile", Toast.LENGTH_SHORT).show()
+            R.id.nav_history -> Toast.makeText(applicationContext, "History", Toast.LENGTH_SHORT).show()
+            R.id.nav_settings -> showSettingsActivity()
+            R.id.nav_faq -> Toast.makeText(applicationContext, "FAQ", Toast.LENGTH_SHORT).show()
+            R.id.nav_support_request -> Toast.makeText(applicationContext, "Make support request", Toast.LENGTH_SHORT).show()
+        }
+        return true
+    }
+
+    private fun showSettingsActivity() {
+        val userSettingsIntent = Intent(this@MainActivity, UserSettingsActivity::class.java)
+        startActivity(userSettingsIntent)
+    }
 
     /*
     * Class for return statement
@@ -57,30 +77,31 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
     private class CheckCabRideStatus(var cabRideStatus: Boolean? = false, var checkCabRideResponse: CheckCabRideStatusResponse? = null)
 
     private var sPref: SharedPreferences? = null
-    private var orderForAnother: Boolean = false
-    private var pendingOrder: Boolean = false
     private var addressTextView: TextView? = null
-    private var addressSearch: AutocompleteSupportFragment? = null
-    private var pinImageView: ImageView? = null
     private var mMap: GoogleMap? = null
-    private var optionsDialog: AlertDialog? = null
-    private var ridingEndDialog: AlertDialog? = null
-    private var wishesDialog: AlertDialog? = null
-    private var errorMessage: String? = ""
-    private var commentText: String? = ""
+    private var currentPolyline: Polyline? = null
+    var availableOrderDialog: AlertDialog? = null
 
+    lateinit var destinationPoint: LatLng
+    lateinit var startPoint: LatLng
+
+    var activeOrderDialog: AlertDialog? = null
+
+    private var ridingEndDialog: AlertDialog? = null
+    var progressBar: ProgressBar? = null
+    var orderAcceptButton: Button? = null
+    var orderSkipButton: Button? = null
     private var geocoder: Geocoder? = null
-    private var addresses: List<Address>? = emptyList()
     private var mCameraPosition: CameraPosition? = null
     private var mLastKnownLocation: Location? = null
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private var currentMarker: Marker? = null
-    private var destinationMarker: Marker? = null
-    private var currentPolyline: Polyline? = null
 
+    private var destinationMarker: Marker? = null
     // A default location and default zoom to use when location permission is
     // not granted.
     private val mDefaultLocation = LatLng(56.835974, 60.614522)
+
     private var mLocationPermissionGranted: Boolean = false
     private val isGeoDisabled: Boolean
         get() {
@@ -89,17 +110,28 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
             val mIsNetworkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
             return !mIsGPSEnabled && !mIsNetworkEnabled
         }
+    private var navigationBar: NavigationView? = null
+
+    private var ignoredOrders: MutableList<Int> = mutableListOf()
+
+    private var isTimerActive: Boolean = false
+    private var timer: Timer? = null
+    private var timerTask: TimerTask? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ForDebugging().turnOnStrictMode()
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        addressTextView = address
+        navigationBar = nav_view
+        navigationBar!!.setNavigationItemSelectedListener(this@MainActivity)
 
+        addressTextView = address
         sPref = getSharedPreferences("TaxiService", Context.MODE_PRIVATE)
 
-        addressSearch = startPlaceSearch as AutocompleteSupportFragment?
+
+        availableOrderDialog = AlertDialog.Builder(this@MainActivity).setView(this.layoutInflater.inflate(R.layout.activity_available_order_dialog, null)).create()
+        activeOrderDialog = AlertDialog.Builder(this@MainActivity).setView(this.layoutInflater.inflate(R.layout.activity_active_order_dialog, null)).create()
 
 //        optionsDialog = AlertDialog.Builder(this@MainActivity).setView(R.layout.activity_order_options).create()
 //        wishesDialog = AlertDialog.Builder(this@MainActivity).setView(R.layout.activity_order_wishes).create()
@@ -122,10 +154,376 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
 
         mapFragment!!.view!!.alpha = 0.7F
 
-        addressSearch!!.view!!.onFocusChangeListener = View.OnFocusChangeListener { _, _ ->
-            addressSearch!!.view!!.visibility = View.VISIBLE
+        val startWorkButtonText = resources.getString(R.string.finish_work)
+
+        // Check active shift
+        // TODO if has active order show order screen
+        // sPref!!.getInt("active_order_id", -1)
+        if (sPref!!.getBoolean("shift_is_active", false)) {
+            startWorkButton.background = ContextCompat.getDrawable(this@MainActivity, R.color.quantum_googred600)
+            startWorkButton.setText(R.string.finish_work)
         }
-        addressSearch!!.view!!.alpha = 0F
+
+        startWorkButton.setOnClickListener {
+            if (startWorkButton.hint != startWorkButtonText && sPref!!.getBoolean("shift_is_active", false)) {
+                finishWork()
+            } else {
+                startWork()
+            }
+
+        }
+
+        // Init timer
+        timerTask = object : TimerTask() {
+            override fun run() {
+                runOnUiThread { checkAvailableOrders() }
+            }
+        }
+    }
+
+    private fun startTimer() {
+        if (!isTimerActive) {
+            timer = Timer()
+            timerTask = object : TimerTask() {
+                override fun run() {
+                    runOnUiThread { checkAvailableOrders() }
+                }
+            }
+            timer!!.scheduleAtFixedRate(timerTask, 5000, 5000)
+            isTimerActive = true
+        }
+    }
+
+    private fun stopTimer() {
+        if (isTimerActive) {
+            timer!!.cancel()
+            isTimerActive = false
+        }
+    }
+
+    private fun checkAvailableOrders() {
+        // TODO: Validate not null fields
+        // Build connection and rpc objects
+        GlobalScope.launch {
+            val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
+            val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
+            val checkAvailableOrdersRequest = CheckAvailableOrdersRequest.newBuilder()
+                    .setApi(getString(R.string.api_version))
+                    .build()
+            val checkAvailableOrdersResponse: CheckAvailableOrdersResponse
+            try {
+                checkAvailableOrdersResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).checkAvailableOrders(checkAvailableOrdersRequest) // Запрос на создание
+                managedChannel.shutdown()
+                runOnUiThread {
+                    Log.i("Calling checkAvailableOrders: ", "call!")
+                    showAvailableOrder(checkAvailableOrdersResponse)
+                }
+            } catch (e: StatusRuntimeException) {
+                // Check exceptions
+                when {
+                    e.status.cause is java.net.ConnectException -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.PERMISSION_DENIED -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_invalid_token, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.UNKNOWN -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                }
+                Platform.logger.log(Level.WARNING, "RPC failed: " + e.status)
+                managedChannel.shutdown()
+            }
+        }
+
+    }
+
+    private fun showAvailableOrder(ordersResponse: CheckAvailableOrdersResponse?) {
+        stopTimer()
+        availableOrderDialog!!.show()
+        orderSkipButton = availableOrderDialog!!.skipOrderButton
+        orderAcceptButton = availableOrderDialog!!.acceptOrderButton
+        progressBar = availableOrderDialog!!.availableOrderProgress
+        // Parsed LatLng from response in format lat/lng: (x,y)
+        val pattern = "\\(.+\\)".toRegex()
+
+        val ltdLngStringStartPoint = pattern.find(ordersResponse!!.cabRide.startingPoint)!!
+                .value.replace("[()]".toRegex(), "").split(',')
+        val ltdLngStringDestinationPoint = pattern.find(ordersResponse.cabRide.endingPoint)!!
+                .value.replace("[()]".toRegex(), "").split(',')
+
+        startPoint = LatLng(ltdLngStringStartPoint[0].toDouble(), ltdLngStringStartPoint[1].toDouble())
+        destinationPoint = LatLng(ltdLngStringDestinationPoint[0].toDouble(), ltdLngStringDestinationPoint[1].toDouble())
+
+        // Draw route and set time and distance in dialog
+        FetchURL(this@MainActivity).execute(
+                getUrl(LatLng(
+                        mLastKnownLocation!!.latitude,
+                        mLastKnownLocation!!.longitude
+                ), startPoint, "driving"),
+                "driving"
+        )
+        // Move camera to destination marker
+        mMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                startPoint, 13F))
+        var totalProgress = 100
+        val countDownTimer = object : CountDownTimer(10000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                totalProgress -= 10
+                progressBar!!.progress = totalProgress
+            }
+
+            override fun onFinish() {
+                availableOrderDialog!!.dismiss()
+                progressBar!!.progress = 100
+                currentPolyline?.remove()
+                Log.i("Progress bar: ", "is finished")
+                startTimer()
+            }
+        }.start()
+
+        orderAcceptButton!!.setOnClickListener {
+            countDownTimer.cancel()
+            acceptOrder(ordersResponse)
+            progressBar!!.progress = totalProgress
+
+            availableOrderDialog!!.dismiss()
+        }
+
+        orderSkipButton!!.setOnClickListener {
+            countDownTimer.cancel()
+            ignoredOrders.add(ordersResponse!!.cabRide.id)
+            availableOrderDialog!!.dismiss()
+            currentPolyline?.remove()
+            startTimer()
+        }
+    }
+
+    // TODO write to spref active cab_ride.id
+    private fun acceptOrder(ordersResponse: CheckAvailableOrdersResponse?) {
+        GlobalScope.launch {
+            val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
+            val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
+            val acceptOrderRequest = AcceptOrderRequest.newBuilder()
+                    .setApi(getString(R.string.api_version))
+                    .setCabRideId(ordersResponse!!.cabRide.id)
+                    .setDriverId(sPref!!.getInt("driver_id", -1))
+                    .build()
+            val acceptOrderResponse: AcceptOrderResponse
+            try {
+                acceptOrderResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).acceptOrder(acceptOrderRequest) // Запрос на создание
+                managedChannel.shutdown()
+                if (acceptOrderResponse.isAccepted) {
+                    sPref!!.edit().putInt("cab_ride_id", ordersResponse.cabRide.id).apply()
+                    showOrderStartScreen()
+                }
+            } catch (e: StatusRuntimeException) {
+                // Check exceptions
+                when {
+                    e.status.cause is java.net.ConnectException -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.PERMISSION_DENIED -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_invalid_token, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.UNKNOWN -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                }
+                Platform.logger.log(Level.WARNING, "RPC failed: " + e.status)
+                managedChannel.shutdown()
+            }
+        }
+
+    }
+
+    override fun onTaskDone(vararg values: Any) {
+        currentPolyline?.remove()
+        currentPolyline = mMap!!.addPolyline(values[0] as PolylineOptions?)
+    }
+
+    private fun showOrderStartScreen() {
+        runOnUiThread {
+
+            var geocoder: Geocoder? = null
+            var startPointAddresses: MutableList<Address> = mutableListOf()
+            var destinationPointAddresses: MutableList<Address> = mutableListOf()
+
+            geocoder = Geocoder(this@MainActivity, Locale.getDefault())
+
+            activeOrderDialog!!.setCanceledOnTouchOutside(false)
+            activeOrderDialog!!.show()
+
+            activeOrderDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            activeOrderDialog!!.window!!.setGravity(Gravity.BOTTOM)
+
+            val startPoint = startPoint
+            val destinationPoint = destinationPoint
+
+            startPointAddresses = geocoder.getFromLocation(startPoint.latitude, startPoint.longitude, 1)
+            destinationPointAddresses = geocoder.getFromLocation(destinationPoint.latitude, destinationPoint.longitude, 1)
+
+            activeOrderDialog!!.routeStartPoint.text = startPointAddresses[0].getAddressLine(0)
+            activeOrderDialog!!.routeDestination.text = destinationPointAddresses[0].getAddressLine(0)
+
+            // FIXME button is not clickable
+            activeOrderDialog!!.cancelOrderButton.setOnClickListener {
+                cancelOrder()
+                currentPolyline?.remove()
+            }
+            activeOrderDialog!!.startTripButton.setOnClickListener {
+                activeOrderDialog!!.cancelOrderButton.background = ContextCompat.getDrawable(this@MainActivity, R.color.btn_success)
+                activeOrderDialog!!.cancelOrderButton.text = getString(R.string.end_order)
+                activeOrderDialog!!.cancelOrderButton.setOnClickListener {
+                    endTrip()
+                    currentPolyline?.remove()
+                }
+                val buttonLayout = (activeOrderDialog!!.startTripButton.parent as ViewGroup)
+                buttonLayout.removeView(activeOrderDialog!!.startTripButton)
+                startTrip()
+            }
+        }
+    }
+
+    private fun startTrip() {
+        GlobalScope.launch {
+            val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
+            val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
+            val startTripRequest = StartTripRequest.newBuilder()
+                    .setApi(getString(R.string.api_version))
+                    .setCabRideId(sPref!!.getInt("cab_ride_id", -1))
+                    .setDriverId(sPref!!.getInt("driver_id", -1))
+                    .build()
+            val startTripResponse: StartTripResponse
+            try {
+                startTripResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).startTrip(startTripRequest) // Запрос на создание
+                managedChannel.shutdown()
+                if (startTripResponse.isStarted) {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, R.string.success_order_accepted_message, Toast.LENGTH_LONG).show()
+                    }
+                }
+            } catch (e: StatusRuntimeException) {
+                // Check exceptions
+                when {
+                    e.status.cause is java.net.ConnectException -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.PERMISSION_DENIED -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_invalid_token, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.UNKNOWN -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                }
+                Platform.logger.log(Level.WARNING, "RPC failed: " + e.status)
+                managedChannel.shutdown()
+            }
+        }
+    }
+
+    private fun endTrip() {
+        GlobalScope.launch {
+            val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
+            val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
+            val endTripRequest = EndTripRequest.newBuilder()
+                    .setApi(getString(R.string.api_version))
+                    .setCabRideId(sPref!!.getInt("cab_ride_id", -1))
+                    .setDriverId(sPref!!.getInt("driver_id", -1))
+                    .build()
+            val endTripResponse: EndTripResponse
+            try {
+                endTripResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).endTrip(endTripRequest) // Запрос на создание
+                managedChannel.shutdown()
+                if (endTripResponse.isEnded) {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, R.string.success_order_ended_message, Toast.LENGTH_LONG).show()
+                    }
+                    activeOrderDialog!!.dismiss()
+                }
+            } catch (e: StatusRuntimeException) {
+                // Check exceptions
+                when {
+                    e.status.cause is java.net.ConnectException -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.PERMISSION_DENIED -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_invalid_token, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.UNKNOWN -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                }
+                Platform.logger.log(Level.WARNING, "RPC failed: " + e.status)
+                managedChannel.shutdown()
+            }
+        }
+    }
+
+    private fun cancelOrder() {
+        GlobalScope.launch {
+            val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
+            val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
+            val cancelOrderRequest = CancelOrderRequest.newBuilder()
+                    .setApi(getString(R.string.api_version))
+                    .setCabRideId(sPref!!.getInt("cab_ride_id", -1))
+                    .setDriverId(sPref!!.getInt("driver_id", -1))
+                    .build()
+            val cancelOrderResponse: CancelOrderResponse
+            try {
+                cancelOrderResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).cancelOrder(cancelOrderRequest) // Запрос на создание
+                managedChannel.shutdown()
+                if (cancelOrderResponse.isCanceled) {
+                    activeOrderDialog!!.dismiss()
+                }
+            } catch (e: StatusRuntimeException) {
+                // Check exceptions
+                when {
+                    e.status.cause is java.net.ConnectException -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.PERMISSION_DENIED -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_invalid_token, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.UNKNOWN -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                }
+                Platform.logger.log(Level.WARNING, "RPC failed: " + e.status)
+                managedChannel.shutdown()
+            }
+        }
+    }
+
+    private fun finishWork() {
+        GlobalScope.launch {
+            val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
+            val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
+            val stopShiftRequest = StopShiftRequest.newBuilder()
+                    .setApi(getString(R.string.api_version))
+                    .setDriverId(sPref!!.getInt("driver_id", -1))
+                    .build()
+            try {
+                val stopShiftResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).stopShift(stopShiftRequest) // Запрос на создание
+                managedChannel.shutdown()
+                sPref!!.edit().putBoolean("shift_is_active", false).apply()
+                runOnUiThread {
+                    startWorkButton.background = ContextCompat.getDrawable(this@MainActivity, R.color.btn_success)
+                    startWorkButton.setText(R.string.start_work)
+                }
+            } catch (e: StatusRuntimeException) {
+                // Check exceptions
+                when {
+                    e.status.cause is java.net.ConnectException -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.PERMISSION_DENIED -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_invalid_token, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.UNKNOWN -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                }
+                Platform.logger.log(Level.WARNING, "RPC failed: " + e.status)
+                managedChannel.shutdown()
+            }
+        }
+
+    }
+
+    private fun startWork() {
+        GlobalScope.launch {
+            val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
+            val blockingStub = taxiServiceGrpc.newBlockingStub(managedChannel)
+            val startShiftRequest = StartShiftRequest.newBuilder()
+                    .setApi(getString(R.string.api_version))
+                    .setDriverId(sPref!!.getInt("driver_id", -1))
+                    .build()
+            try {
+                val startShiftResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).startShift(startShiftRequest) // Запрос на создание
+                managedChannel.shutdown()
+                sPref!!.edit().putBoolean("shift_is_active", true).apply()
+                runOnUiThread {
+                    // Run timer when status of working is changed
+                    startTimer()
+                    startWorkButton.background = ContextCompat.getDrawable(this@MainActivity, R.color.quantum_googred600)
+                    startWorkButton.setText(R.string.finish_work)
+                }
+            } catch (e: StatusRuntimeException) {
+                // Check exceptions
+                when {
+                    e.status.cause is java.net.ConnectException -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.PERMISSION_DENIED -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_invalid_token, Toast.LENGTH_LONG).show() }
+                    e.status.code == io.grpc.Status.Code.UNKNOWN -> runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                }
+                Platform.logger.log(Level.WARNING, "RPC failed: " + e.status)
+                managedChannel.shutdown()
+            }
+        }
     }
 
     private fun showOrdersEndScreen() {
@@ -148,92 +546,6 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
 
     @SuppressLint("SetTextI18n")
     private fun setLiveCabRideInfo(checkCabRideResponse: CheckCabRideStatusResponse?) {
-        progressBar!!.visibility = View.GONE
-        addressTextView!!.setText(R.string.driver_is_coming)
-        changeAddress!!.text = checkCabRideResponse!!.brandName + ' ' + checkCabRideResponse.modelName + ", " + checkCabRideResponse.color + ", " + checkCabRideResponse.licensePlate + ", " + checkCabRideResponse.firstName
-        // TODO add time and distance to info
-    }
-
-    fun makeOrderOptions(view: View) {
-/*
-        optionsDialog!!.show()
-        optionsDialog!!.addressEdit.setText(addressTextView!!.text)
-        optionsDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        optionsDialog!!.window!!.setGravity(Gravity.BOTTOM)
-
-        optionsDialog!!.wishesButton.setOnClickListener {
-            wishesDialog!!.show()
-            wishesDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            wishesDialog!!.window!!.setGravity(Gravity.BOTTOM)
-            wishesDialog!!.pendingOrderCheck.setOnClickListener {
-                wishesDialog!!.pendingOrderCheck!!.isChecked = !wishesDialog!!.pendingOrderCheck!!.isChecked
-            }
-            wishesDialog!!.orderForAnotherCheck.setOnClickListener {
-                wishesDialog!!.orderForAnotherCheck!!.isChecked = !wishesDialog!!.orderForAnotherCheck!!.isChecked
-            }
-            wishesDialog!!.readyWishesButton.setOnClickListener {
-                commentText = wishesDialog!!.commentEdit.text.toString()
-                pendingOrder = wishesDialog!!.pendingOrderCheck!!.isChecked
-                orderForAnother = wishesDialog!!.orderForAnotherCheck!!.isChecked
-                wishesDialog!!.dismiss()
-            }
-        }
-
-        optionsDialog!!.makeOrderButton.setOnClickListener {
-            if (makeOrderRequest()) {
-                findCab()
-            }
-        }
-        autocompleteFragmentSetup(destinationEdit as AutocompleteSupportFragment)
-        (destinationEdit as AutocompleteSupportFragment).setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onPlaceSelected(place: Place) {
-                destinationMarker = mMap!!.addMarker(MarkerOptions().position(place.latLng!!))
-                with(mMap) {
-                    this!!.setOnCameraIdleListener(null)
-                    this.setOnCameraMoveStartedListener(null)
-                }
-                mMap!!.moveCamera(CameraUpdateFactory
-                        .newLatLngZoom(currentMarker!!.position, DEFAULT_ZOOM.toFloat()))
-                (destinationEdit as AutocompleteSupportFragment).setText(place.address)
-                FetchURL(this@MainActivity).execute(getUrl(currentMarker!!.position, destinationMarker!!.position, "driving"), "driving")
-            }
-
-            override fun onError(status: Status) {
-                Toast.makeText(this@MainActivity, status.toString(), Toast.LENGTH_SHORT).show()
-            }
-        })
-        if (currentMarker != null && destinationMarker != null) {
-            if (currentMarker!!.position != null && destinationMarker!!.position != null) {
-                FetchURL(this@MainActivity).execute(getUrl(currentMarker!!.position, destinationMarker!!.position, "driving"), "driving")
-            }
-        }
-*/
-    }
-
-
-    private fun stopFindingCab() {
-/*
-        if (deleteCabRequest()) {
-            pinImageView!!.visibility = View.VISIBLE
-            progressBar!!.visibility = View.GONE
-            addressTextView!!.visibility = View.VISIBLE
-            changeAddress!!.visibility = View.VISIBLE
-            changeAddress!!.setText(R.string.change_address)
-            startPlaceSearch.view!!.visibility = View.VISIBLE
-            orderButton.setText(R.string.make_order)
-            orderButton!!.background = ContextCompat.getDrawable(this@MainActivity, R.color.default_button_material_light)
-            orderButton.setOnClickListener {
-                makeOrderOptions(it)
-            }
-            with(mMap) {
-                this!!.setOnCameraIdleListener(this@MainActivity)
-                this.setOnCameraMoveStartedListener(this@MainActivity)
-            }
-            destinationMarker?.remove()
-            currentPolyline?.remove()
-            getDeviceLocation()
-        }
-*/
     }
 
     private fun checkCabRideStatus(): CheckCabRideStatus {
@@ -263,58 +575,6 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
             CheckCabRideStatus()
         }
     }
-
-    private fun autocompleteFragmentSetup(autocompleteSupportFragment: AutocompleteSupportFragment) {
-        // Places SDK initialize
-        if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, BuildConfig.GoogleMapsKey)
-        }
-        val placesClient = Places.createClient(this)
-        val token = AutocompleteSessionToken.newInstance()
-        val bounds: RectangularBounds = when {
-            currentMarker != null -> RectangularBounds.newInstance(
-                    LatLng(currentMarker!!.position.latitude - 0.2, currentMarker!!.position.longitude + 0.6),
-                    LatLng(currentMarker!!.position.latitude + 0.2, currentMarker!!.position.longitude - 0.6)
-            )
-            mLastKnownLocation != null -> RectangularBounds.newInstance(
-                    LatLng(mLastKnownLocation!!.latitude - 0.2, mLastKnownLocation!!.longitude + 0.6),
-                    LatLng(mLastKnownLocation!!.latitude + 0.2, mLastKnownLocation!!.longitude - 0.6)
-            )
-            else -> RectangularBounds.newInstance(
-                    LatLng(mDefaultLocation.latitude - 0.2, mDefaultLocation.longitude + 0.6),
-                    LatLng(mDefaultLocation.latitude + 0.2, mDefaultLocation.longitude - 0.6)
-            )
-        }
-        autocompleteSupportFragment.setPlaceFields(Arrays.asList(Place.Field.ADDRESS, Place.Field.NAME, Place.Field.LAT_LNG))
-        val request = FindAutocompletePredictionsRequest.builder()
-                .setLocationBias(bounds)
-                .setCountry("RU")
-                .setTypeFilter(TypeFilter.ADDRESS)
-                .setSessionToken(token)
-                .setQuery(autocompleteSupportFragment.toString())
-                .build()
-        placesClient.findAutocompletePredictions(request)
-        autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onPlaceSelected(place: Place) {
-                addressTextView!!.text = place.name
-                currentMarker?.position = place.latLng
-                mMap!!.moveCamera(CameraUpdateFactory
-                        .newLatLngZoom(currentMarker?.position, DEFAULT_ZOOM.toFloat()))
-            }
-
-            override fun onError(status: Status) {
-                Toast.makeText(this@MainActivity, status.toString(), Toast.LENGTH_SHORT).show()
-
-            }
-        })
-    }
-
-/*
-    override fun onTaskDone(vararg values: Any) {
-        currentPolyline?.remove()
-        currentPolyline = mMap!!.addPolyline(values[0] as PolylineOptions?)
-    }
-*/
 
     private fun getUrl(origin: LatLng, dest: LatLng, directionMode: String): String {
         // Origin of route
@@ -415,25 +675,12 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
         // Get the current location of the device and set the position of the map.
         getDeviceLocation()
 
-/*
-        with(mMap) {
-            this!!.setOnCameraIdleListener(this@MainActivity)
-            this.setOnCameraMoveStartedListener(this@MainActivity)
-        }
-*/
-
         mMap!!.setOnMyLocationButtonClickListener {
             if (isGeoDisabled) {
                 val settingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(settingsIntent)
             }
             false
-        }
-        currentMarker = if (mLastKnownLocation != null) {
-            mMap!!.addMarker(MarkerOptions().position(LatLng(mLastKnownLocation!!.latitude,
-                    mLastKnownLocation!!.longitude)))
-        } else {
-            mMap!!.addMarker(MarkerOptions().position(mDefaultLocation))
         }
 
         if (sPref!!.getInt("orderedCabRideId", -1) != -1) {
@@ -451,65 +698,6 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
         }
     }
 
-    override fun onCameraIdle() {
-        /*
-          val layoutParams: ConstraintLayout.LayoutParams = pinImage!!.layoutParams as ConstraintLayout.LayoutParams
-             layoutParams.width = 128
-             layoutParams.height = 200
-             pinImage!!.layoutParams = layoutParams
-             addressTextView!!.visibility = View.VISIBLE
-             addressSearch!!.view!!.visibility = View.VISIBLE
-             val center: LatLng = mMap!!.cameraPosition.target
-             currentMarker = mMap!!.addMarker(MarkerOptions().position(center))
-             if (currentMarker != null) {
-                 try {
-                     addresses = geocoder!!.getFromLocation(currentMarker!!.position.latitude, currentMarker!!.position.longitude, 1)
-                 } catch (ioException: IOException) {
-                     // Catch network or other I/O problems.
-                     errorMessage = R.string.error_internet_connection.toString()
-                     Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_SHORT).show()
-                 } catch (illegalArgumentException: IllegalArgumentException) {
-                     // Catch invalid latitude or longitude values.
-                     errorMessage = R.string.error_internet_connection.toString()
-                     Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_SHORT).show()
-                 }
-
-                 // Handle case where no address was found.
-                 if (addresses!!.isEmpty()) {
-                     if (errorMessage!!.isEmpty()) {
-                         errorMessage = getString(R.string.warning_address_not_found)
-                         Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_SHORT).show()
-                     }
-                 } else {
-                     val address = addresses!![0]
-                     if (address.thoroughfare == null || address.subThoroughfare == null) {
-                         addressTextView!!.setText(R.string.warning_unable_to_locate)
-                     } else {
-                         addressTextView!!.text = (address.thoroughfare + ',' + address.subThoroughfare)
-                     }
-                     currentMarker!!.remove()
-                 }
-     //            var address: String =  addresses[0].getAddressLine(0)
-             }
-             autocompleteFragmentSetup(startPlaceSearch as AutocompleteSupportFragment)
-            */
-    }
-
-    override fun onCameraMoveStarted(p0: Int) {
-        /*
-
-        if (currentMarker != null) {
-            currentMarker!!.remove()
-        }
-        addressTextView!!.visibility = View.INVISIBLE
-        addressSearch!!.view!!.visibility = View.INVISIBLE
-        val layoutParams: ConstraintLayout.LayoutParams = pinImage!!.layoutParams as ConstraintLayout.LayoutParams
-        layoutParams.width = 64
-        layoutParams.height = 100
-        pinImage!!.layoutParams = layoutParams
-   */
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
@@ -520,18 +708,6 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnCameraIdleListener, Google
     }
 
     companion object {
-        @JvmStatic
-        fun setRouteData(routeData: String) {
-            if (routeData.isNotEmpty()) {
-                val routeDataArray = routeData.split(' ')
-                routeDistance = routeDataArray[0].toInt()
-                routeTime = routeDataArray[1].toDouble()
-                Log.v("FetchURL", routeDistance.toString() + " " + routeTime)
-            }
-        }
-
-        private var routeTime: Double? = null
-        private var routeDistance: Int? = null
 
         // Keys for storing activity state.
         private const val KEY_CAMERA_POSITION = "camera_position"

@@ -111,8 +111,8 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:onClick="addCarDialog"
+            android:enabled="false"
             android:text="@string/register" />
-        <!--TODO: make registerButton unavailable-->
 
     </LinearLayout>
 </ScrollView>

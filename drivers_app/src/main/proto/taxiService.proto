@@ -33,8 +33,9 @@ message Driver {
     string email = 8;
     string password = 9;
     string authToken = 10;
-    google.protobuf.Timestamp create_time = 11;
-    google.protobuf.Timestamp update_time = 12;
+    bool activated = 11;
+    google.protobuf.Timestamp create_time = 12;
+    google.protobuf.Timestamp update_time = 13;
 }
 
 message DriverDocuments {
@@ -69,7 +70,7 @@ message Color {
 
 message Cab {
     int32 id = 1;
-    string color = 2;
+    int32 colorId = 2;
     string licensePlate = 3;
     int32 carModelId = 4;
     int32 driverId = 5;
@@ -232,7 +233,8 @@ message DeleteDriverResponse {
 message CreateCabRideRequest {
     string api = 1;
     CabRide cabRide = 2;
-    string authToken = 3;
+    string price = 3;
+    string authToken = 4;
 }
 
 message CreateCabRideResponse {
@@ -274,7 +276,7 @@ message CheckCabRideStatusResponse {
     string firstName = 2;
     string surname = 3;
     string phoneNumber = 4;
-    int32 licensePlate = 5;
+    string licensePlate = 5;
     string color = 6;
     string modelName = 7;
     string brandName = 8;
@@ -310,7 +312,127 @@ message ReadAllColorsResponse {
     repeated Color color = 2;
 }
 
+// For drivers
+
+/*
+message ChangeStatusRequest {
+    string api = 1;
+    int32 driverId = 2;
+}
+message ChangeStatusResponse {
+    string api = 1;
+    bool isChanged = 2;
+    int32 shiftId = 3;
+}
+*/
+
+/*
+message CheckAvailableRidesRequest {
+        string api = 1;
+        string latLng = 2;
+}
+
+message CheckAvailableRidesResponse {
+    string api = 1;
+}
+*/
+
+
+message CreateCabRequest {
+    string api = 1;
+    string licensePlate = 2;
+    string carBrandName = 3;
+    string carModelName = 4;
+    string colorDescription = 5;
+    int32 driverId = 6;
+}
+message CreateCabResponse {
+    string api = 1;
+    int32 cabId = 2;
+}
+
+
+message GetDriversCabsRequest {
+    string api = 1;
+    int32 driverId = 2;
+}
+message GetDriversCabsResponse {
+    string api = 1;
+    repeated Cab cabs = 2;
+}
+
+message StartShiftRequest {
+    string api = 1;
+    int32 driverId = 2;
+}
+message StartShiftResponse {
+    string api = 1;
+    bool isStarted = 2;
+}
+
+message StopShiftRequest {
+    string api = 1;
+    int32 driverId = 2;
+}
+message StopShiftResponse {
+    string api = 1;
+    bool isStopped = 2;
+}
+
+message CheckAvailableOrdersRequest {
+    string api = 1;
+    int64 latitude = 2;
+    int64 longitude = 3;
+    repeated int32 ignoredOrder = 4;
+}
+message CheckAvailableOrdersResponse {
+    string api = 1;
+    CabRide cabRide = 2;
+}
+
+message AcceptOrderRequest {
+    string api = 1;
+    int32 cabRideId = 2;
+    int32 driverId = 3;
+}
+message AcceptOrderResponse {
+    string api = 1;
+    bool isAccepted = 2;
+}
+
+message CancelOrderRequest {
+    string api = 1;
+    int32 cabRideId = 2;
+    int32 driverId = 3;
+}
+message CancelOrderResponse {
+    string api = 1;
+    bool isCanceled = 2;
+}
+
+message StartTripRequest {
+    string api = 1;
+    int32 cabRideId = 2;
+    int32 driverId = 3;
+}
+message StartTripResponse {
+    string api = 1;
+    bool isStarted = 2;
+}
+
+message EndTripRequest {
+    string api = 1;
+    int32 cabRideId = 2;
+    int32 driverId = 3;
+}
+message EndTripResponse {
+    string api = 1;
+    bool isEnded = 2;
+}
+
+
 service taxiService {
+    // Auth routes
     rpc LoginUser (LoginRequest) returns (LoginResponse);
     rpc TokenCheck (TokenCheckRequest) returns (TokenCheckResponse);
 
@@ -326,14 +448,29 @@ service taxiService {
     rpc UpdateDriver (UpdateDriverRequest) returns (UpdateDriverResponse);
     rpc DeleteDriver (DeleteDriverRequest) returns (DeleteDriverResponse);
 
+    // Cab ride routes
     rpc CreateCabRide (CreateCabRideRequest) returns (CreateCabRideResponse);
     rpc DeleteCabRide (DeleteCabRideRequest) returns (DeleteCabRideResponse);
     rpc UpdateCabRide (UpdateCabRideRequest) returns (UpdateCabRideResponse);
-
     rpc CheckCabRideStatus (CheckCabRideStatusRequest) returns (CheckCabRideStatusResponse);
 
+    // Cabs routes
     rpc ReadAllCarBrands (ReadAllCarBrandsRequest) returns (ReadAllCarBrandsResponse);
     rpc ReadAllCarModels (ReadAllCarModelsRequest) returns (ReadAllCarModelsResponse);
-
     rpc GetColors (ReadAllColorsRequest) returns (ReadAllColorsResponse);
+
+    //    rpc ChangeDriverStatus (ChangeStatusRequest) returns (ChangeStatusResponse);
+    rpc AcceptOrder (AcceptOrderRequest) returns (AcceptOrderResponse);
+    rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse);
+    rpc StartTrip (StartTripRequest) returns (StartTripResponse);
+    rpc EndTrip (EndTripRequest) returns (EndTripResponse);
+
+    rpc GetDriversCabs (GetDriversCabsRequest) returns (GetDriversCabsResponse);
+
+    rpc StartShift (StartShiftRequest) returns (StartShiftResponse);
+    rpc StopShift (StopShiftRequest) returns (StopShiftResponse);
+
+    rpc CreateCab (CreateCabRequest) returns (CreateCabResponse);
+
+    rpc CheckAvailableOrders (CheckAvailableOrdersRequest) returns (CheckAvailableOrdersResponse);
 }
