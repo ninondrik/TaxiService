@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="login">Логин</string>
+    <string name="login">Войти</string>
     <string name="password">Пароль</string>
     <string name="register">Зарегистрироваться</string>
     <string name="email_hint">Заполните email для получения чеков и новостной рассылки</string>
@@ -9,29 +9,11 @@
     <string name="for_registered_users">Я уже зарегистрирован в сервисе.</string>
     <string name="not_registered">Я ещё не зарегистрирован.</string>
     <string name="address">Адрес</string>
-    <string name="change_address">Изменить адрес</string>
-    <string name="make_order">Оформить заказ</string>
-    <string name="entrance">Подъезд</string>
-    <string-array name="pay_type">
-        <item>Наличные</item>
-    </string-array>
     <string name="destination">Куда</string>
-    <string name="wishes">Пожелания</string>
-    <string name="car_delivery">Подача через 10 минут</string>
-    <string name="comment_for_driver">Комментарий для водителя</string>
-    <string name="order_for_another_men">Заказ другому человеку</string>
-    <string name="ready">Готово</string>
     <string name="cancel_order">Отменить поездку</string>
-    <string name="driver_is_coming">Водитель в пути</string>
-    <string name="finding_driver">Поиск водителя…</string>
-    <string name="rate_ride">Оцените поездку.</string>
-    <string name="feedback">Отзыв</string>
-    <string name="send_feedback">Отправить отзыв</string>
     <string name="phone_number_without_7">Номер телефона без +7</string>
     <string name="use_latin_and_next_symbols">Используйте латиницу и следующие символы: $@!%*#?&amp;</string>
 
-    <string name="warning_address_not_found">Адрес не был найден</string>
-    <string name="warning_unable_to_locate">Не удается найти место</string>
     <string name="warning_weak_password">Слабый пароль</string>
 
     <string name="error_internet_connection">Нет интернет соединения!</string>
@@ -43,7 +25,6 @@
     <string name="patronymic">Отчество</string>
     <string name="surname">Фамилия</string>
     <string name="license_expiry_date">Срок лицензии</string>
-    <string name="load_car_image">Загрузить фото авто</string>
     <string name="load_driving_licence_image">Загрузить фото водительских прав</string>
     <string name="load_passport_image">Загрузить скан паспорта</string>
     <string name="load_sts">Загрузить скан СТС</string>
@@ -68,13 +49,17 @@
     <string name="start_work">Начать работу</string>
     <string name="support">Помощь</string>
     <string name="profile">Профиль</string>
-    <string name="toAcceptedOrderTime">Осталось до заказа</string>
-    <string name="accepted_order_arrived">Я на месте</string>
-    <string name="accepted_order_time">Время</string>
     <string name="add_car">Добавить авто</string>
     <string name="delete_car">Удалить авто</string>
-    <string name="order_accept">Прниять</string>
+    <string name="order_accept">Принять</string>
     <string name="order_skip">Пропустить</string>
     <string name="save_settings">Сохранить настройки</string>
     <string name="startPoint">Начало пути</string>
+    <string name="start_trip">Начать поездку</string>
+    <string name="success_order_accepted_message">Заказ начат</string>
+    <string name="success_order_ended_message">Заказ окончен</string>
+    <string name="end_order">Закончить поездку</string>
+    <string name="error_under_eighteen_years">Вы должны быть старше 18 лет</string>
+    <string name="error_empty_fields">Все поля должны быть заполнены</string>
+    <string name="message_account_is_not_verified">Аккаунт не подтвержден. Это может занять некоторое время.</string>
 </resources>

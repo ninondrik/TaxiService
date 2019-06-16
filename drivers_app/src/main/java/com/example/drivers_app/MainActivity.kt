@@ -34,7 +34,10 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import io.grpc.ManagedChannelBuilder
 import io.grpc.StatusRuntimeException
 import io.grpc.okhttp.internal.Platform
@@ -82,22 +85,19 @@ class MainActivity : AppCompatActivity(),
     private var currentPolyline: Polyline? = null
     var availableOrderDialog: AlertDialog? = null
 
-    lateinit var destinationPoint: LatLng
-    lateinit var startPoint: LatLng
+    private var destinationPoint: LatLng? = null
+    private var startPoint: LatLng? = null
 
-    var activeOrderDialog: AlertDialog? = null
+    private var activeOrderDialog: AlertDialog? = null
 
-    private var ridingEndDialog: AlertDialog? = null
     var progressBar: ProgressBar? = null
-    var orderAcceptButton: Button? = null
-    var orderSkipButton: Button? = null
+    private var orderAcceptButton: Button? = null
+    private var orderSkipButton: Button? = null
     private var geocoder: Geocoder? = null
     private var mCameraPosition: CameraPosition? = null
     private var mLastKnownLocation: Location? = null
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
-    private var currentMarker: Marker? = null
 
-    private var destinationMarker: Marker? = null
     // A default location and default zoom to use when location permission is
     // not granted.
     private val mDefaultLocation = LatLng(56.835974, 60.614522)
@@ -158,10 +158,12 @@ class MainActivity : AppCompatActivity(),
 
         // Check active shift
         // TODO if has active order show order screen
+        // FIXME on first login driver already has shift
         // sPref!!.getInt("active_order_id", -1)
         if (sPref!!.getBoolean("shift_is_active", false)) {
             startWorkButton.background = ContextCompat.getDrawable(this@MainActivity, R.color.quantum_googred600)
             startWorkButton.setText(R.string.finish_work)
+            startTimer()
         }
 
         startWorkButton.setOnClickListener {
@@ -241,25 +243,31 @@ class MainActivity : AppCompatActivity(),
         // Parsed LatLng from response in format lat/lng: (x,y)
         val pattern = "\\(.+\\)".toRegex()
 
-        val ltdLngStringStartPoint = pattern.find(ordersResponse!!.cabRide.startingPoint)!!
-                .value.replace("[()]".toRegex(), "").split(',')
-        val ltdLngStringDestinationPoint = pattern.find(ordersResponse.cabRide.endingPoint)!!
-                .value.replace("[()]".toRegex(), "").split(',')
+        val ltdLngStringStartPoint = pattern.find(ordersResponse!!.cabRide.startingPoint)
+                ?.value?.replace("[()]".toRegex(), "")?.split(',')
+        val ltdLngStringDestinationPoint = pattern.find(ordersResponse.cabRide.endingPoint)
+                ?.value?.replace("[()]".toRegex(), "")?.split(',')
 
-        startPoint = LatLng(ltdLngStringStartPoint[0].toDouble(), ltdLngStringStartPoint[1].toDouble())
-        destinationPoint = LatLng(ltdLngStringDestinationPoint[0].toDouble(), ltdLngStringDestinationPoint[1].toDouble())
+        if (ltdLngStringStartPoint != null && ltdLngStringDestinationPoint != null) {
 
-        // Draw route and set time and distance in dialog
-        FetchURL(this@MainActivity).execute(
-                getUrl(LatLng(
-                        mLastKnownLocation!!.latitude,
-                        mLastKnownLocation!!.longitude
-                ), startPoint, "driving"),
-                "driving"
-        )
-        // Move camera to destination marker
-        mMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                startPoint, 13F))
+            startPoint = LatLng(ltdLngStringStartPoint[0].toDouble(), ltdLngStringStartPoint[1].toDouble())
+            destinationPoint = LatLng(ltdLngStringDestinationPoint[0].toDouble(), ltdLngStringDestinationPoint[1].toDouble())
+
+            // Draw route and set time and distance in dialog
+            FetchURL(this@MainActivity).execute(
+                    getUrl(LatLng(
+                            mLastKnownLocation!!.latitude,
+                            mLastKnownLocation!!.longitude
+                    ), startPoint!!, "driving"),
+                    "driving"
+            )
+            // Move camera to destination marker
+            mMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    startPoint, 13F))
+        } else {
+            availableOrderDialog!!.toOfferTime!!.text = ordersResponse.cabRide.startingPoint
+            availableOrderDialog!!.toOfferDistance!!.text = ordersResponse.cabRide.endingPoint
+        }
         var totalProgress = 100
         val countDownTimer = object : CountDownTimer(10000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -280,13 +288,12 @@ class MainActivity : AppCompatActivity(),
             countDownTimer.cancel()
             acceptOrder(ordersResponse)
             progressBar!!.progress = totalProgress
-
             availableOrderDialog!!.dismiss()
         }
 
         orderSkipButton!!.setOnClickListener {
             countDownTimer.cancel()
-            ignoredOrders.add(ordersResponse!!.cabRide.id)
+            ignoredOrders.add(ordersResponse.cabRide.id)
             availableOrderDialog!!.dismiss()
             currentPolyline?.remove()
             startTimer()
@@ -309,7 +316,7 @@ class MainActivity : AppCompatActivity(),
                 managedChannel.shutdown()
                 if (acceptOrderResponse.isAccepted) {
                     sPref!!.edit().putInt("cab_ride_id", ordersResponse.cabRide.id).apply()
-                    showOrderStartScreen()
+                    showOrderStartScreen(ordersResponse)
                 }
             } catch (e: StatusRuntimeException) {
                 // Check exceptions
@@ -330,12 +337,12 @@ class MainActivity : AppCompatActivity(),
         currentPolyline = mMap!!.addPolyline(values[0] as PolylineOptions?)
     }
 
-    private fun showOrderStartScreen() {
+    private fun showOrderStartScreen(ordersResponse: CheckAvailableOrdersResponse) {
         runOnUiThread {
 
             var geocoder: Geocoder? = null
-            var startPointAddresses: MutableList<Address> = mutableListOf()
-            var destinationPointAddresses: MutableList<Address> = mutableListOf()
+            val startPointAddresses: MutableList<Address>
+            val destinationPointAddresses: MutableList<Address>
 
             geocoder = Geocoder(this@MainActivity, Locale.getDefault())
 
@@ -348,18 +355,23 @@ class MainActivity : AppCompatActivity(),
             val startPoint = startPoint
             val destinationPoint = destinationPoint
 
-            startPointAddresses = geocoder.getFromLocation(startPoint.latitude, startPoint.longitude, 1)
-            destinationPointAddresses = geocoder.getFromLocation(destinationPoint.latitude, destinationPoint.longitude, 1)
+            if (startPoint?.latitude != null && destinationPoint?.latitude != null) {
 
-            activeOrderDialog!!.routeStartPoint.text = startPointAddresses[0].getAddressLine(0)
-            activeOrderDialog!!.routeDestination.text = destinationPointAddresses[0].getAddressLine(0)
+                startPointAddresses = geocoder.getFromLocation(startPoint.latitude, startPoint.longitude, 1)
+                destinationPointAddresses = geocoder.getFromLocation(destinationPoint.latitude, destinationPoint.longitude, 1)
 
+                activeOrderDialog!!.routeStartPoint.text = startPointAddresses[0].getAddressLine(0)
+                activeOrderDialog!!.routeDestination.text = destinationPointAddresses[0].getAddressLine(0)
+            } else {
+                activeOrderDialog!!.routeStartPoint.text = ordersResponse.cabRide.startingPoint
+                activeOrderDialog!!.routeDestination.text = ordersResponse.cabRide.endingPoint
+            }
             // FIXME button is not clickable
             activeOrderDialog!!.cancelOrderButton.setOnClickListener {
                 cancelOrder()
                 currentPolyline?.remove()
             }
-            activeOrderDialog!!.startTripButton.setOnClickListener {
+            activeOrderDialog?.startTripButton?.setOnClickListener {
                 activeOrderDialog!!.cancelOrderButton.background = ContextCompat.getDrawable(this@MainActivity, R.color.btn_success)
                 activeOrderDialog!!.cancelOrderButton.text = getString(R.string.end_order)
                 activeOrderDialog!!.cancelOrderButton.setOnClickListener {
@@ -421,6 +433,7 @@ class MainActivity : AppCompatActivity(),
                     runOnUiThread {
                         Toast.makeText(this@MainActivity, R.string.success_order_ended_message, Toast.LENGTH_LONG).show()
                     }
+                    startTimer()
                     activeOrderDialog!!.dismiss()
                 }
             } catch (e: StatusRuntimeException) {
@@ -683,7 +696,7 @@ class MainActivity : AppCompatActivity(),
             false
         }
 
-        if (sPref!!.getInt("orderedCabRideId", -1) != -1) {
+        if (sPref!!.getInt("orderedCabRideId", -1) > -1) {
             val cabRideStatus = checkCabRideStatus()
             if (cabRideStatus.cabRideStatus!!) { // Is order is active
                 if (cabRideStatus.checkCabRideResponse!!.firstName.isNotEmpty()) { // Has driver accepted an order?

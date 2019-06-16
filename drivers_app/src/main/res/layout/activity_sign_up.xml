@@ -50,7 +50,6 @@
             tools:ignore="Autofill" />
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/birthDateInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -131,7 +130,6 @@
             tools:targetApi="O" />
 
         <TextView
-            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -141,7 +139,6 @@
             android:text="@string/email_hint" />
 
         <Button
-            android:id="@+id/continueRegistrationButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"

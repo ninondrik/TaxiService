@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CarModelAdapter extends RecyclerView.Adapter<CarModelAdapter.ExampleViewHolder> implements Filterable {
-    private List<CarItem> exampleList;
-    private List<CarItem> exampleListFull;
-    private Filter exampleFilter = new Filter() {
+    private final List<CarItem> exampleList;
+    private final List<CarItem> exampleListFull;
+    private final Filter exampleFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<CarItem> filteredList = new ArrayList<>();
@@ -79,8 +79,8 @@ public class CarModelAdapter extends RecyclerView.Adapter<CarModelAdapter.Exampl
     }
 
     class ExampleViewHolder extends RecyclerView.ViewHolder {
-        TextView textView1;
-        TextView textView2;
+        final TextView textView1;
+        final TextView textView2;
 
         ExampleViewHolder(View itemView) {
             super(itemView);

@@ -1,5 +1,7 @@
 package com.example.taxiapp
 
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.support.v7.app.AppCompatActivity
 import android.widget.EditText
 import java.util.regex.Pattern
@@ -43,8 +45,8 @@ class Validation(private val activity: AppCompatActivity) {
 
     }
 
-    fun isPasswordValid(editText: EditText?, checkStrength: Boolean = false): Boolean {
-        val password = editText!!.text.toString()
+    fun isPasswordValid(passwordEdit: EditText?, checkStrength: Boolean = false): Boolean {
+        val password = passwordEdit!!.text.toString()
         val length = password.length
 
         val disallowedSymbols = Pattern.compile("[а-я]+", Pattern.CASE_INSENSITIVE)
@@ -52,19 +54,19 @@ class Validation(private val activity: AppCompatActivity) {
         // Checking disallowed symbols in password
 
         if (length == 0) {
-            editText.error = activity.getString(R.string.error_invalid_value)
+            passwordEdit.error = activity.getString(R.string.error_invalid_value)
             return false
         }
         if (disallowedSymbols.matcher(password).find()) {
-            editText.error = activity.getString(R.string.use_latin_and_next_symbols)
+            passwordEdit.error = activity.getString(R.string.use_latin_and_next_symbols)
             return false
         }
         // Checking passwords strength
         else if (checkStrength) {
             // Minimal length check
             if (length < 6) {
-                editText.setBackgroundColor(activity.getColor(R.color.quantum_vanillaredA400))
-                editText.error = activity.getString(R.string.warning_weak_password)
+                passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_vanillaredA400), PorterDuff.Mode.ADD)
+                passwordEdit.error = activity.getString(R.string.warning_weak_password)
                 return false
             }
             var strengthPass = 0
@@ -83,33 +85,33 @@ class Validation(private val activity: AppCompatActivity) {
                 0 -> return false
                 1 -> {
                     when (length) {
-                        in 16..31 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_vanillaredA400))
-                        in 32..63 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_yellowA700))
-                        in 64..128 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_googgreen))
+                        in 16..31 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_vanillaredA400), PorterDuff.Mode.ADD)
+                        in 32..63 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_yellowA700), PorterDuff.Mode.ADD)
+                        in 64..128 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_googgreen), PorterDuff.Mode.ADD)
                     }
                     return true
                 }
                 2 -> {
                     when (length) {
-                        in 8..24 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_vanillaredA400))
-                        in 25..48 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_yellowA700))
-                        in 49..128 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_googgreen))
+                        in 8..24 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_vanillaredA400), PorterDuff.Mode.ADD)
+                        in 25..48 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_yellowA700), PorterDuff.Mode.ADD)
+                        in 49..128 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_googgreen), PorterDuff.Mode.ADD)
                     }
                     return true
                 }
                 3 -> {
                     when (length) {
-                        in 8..12 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_vanillaredA400))
-                        in 13..20 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_yellowA700))
-                        in 21..128 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_googgreen))
+                        in 8..12 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_vanillaredA400), PorterDuff.Mode.ADD)
+                        in 13..20 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_yellowA700), PorterDuff.Mode.ADD)
+                        in 21..128 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_googgreen), PorterDuff.Mode.ADD)
                     }
                     return true
                 }
                 4 -> {
                     when (length) {
-                        in 6..10 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_vanillaredA400))
-                        in 11..15 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_yellowA700))
-                        in 16..128 -> editText.setBackgroundColor(activity.getColor(R.color.quantum_googgreen))
+                        in 6..10 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_vanillaredA400), PorterDuff.Mode.ADD)
+                        in 11..15 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_yellowA700), PorterDuff.Mode.ADD)
+                        in 16..128 -> passwordEdit.background.colorFilter = PorterDuffColorFilter(activity.getColor(R.color.quantum_googgreen), PorterDuff.Mode.ADD)
                     }
                     return true
                 }

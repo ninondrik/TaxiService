@@ -47,7 +47,7 @@ class SignUpActivity : AppCompatActivity() {
             birthDateEditText!!.text = SpannableStringBuilder("${dayOfMonth.toString().padStart(2, '0')}.${month.toString().padStart(2, '0')}.$year") // format: MM.DD.Y
         }
         datePickerDialog.setOnDismissListener {
-            validation!!.isDateValid(birthDateEditText)
+            validation!!.isBirthDateValid(birthDateEditText)
         }
 
         val policy = Html.fromHtml(getString(R.string.agree_terms_privacy), Html.FROM_HTML_MODE_LEGACY)
@@ -72,6 +72,13 @@ class SignUpActivity : AppCompatActivity() {
                 validation!!.isPasswordValid(passwordEditText, true)
             }
         })
+
+        passwordEditText!!.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                passwordEditText!!.background.clearColorFilter()
+            }
+        }
+
         // Validate phone field
         phoneEditText!!.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -96,7 +103,7 @@ class SignUpActivity : AppCompatActivity() {
                 "name" to validation!!.isFieldValid(nameEditText),
                 "surname" to validation!!.isFieldValid(surnameEditText),
                 "patronymic" to validation!!.isFieldValid(patronymicEditText),
-                "birthDate" to validation!!.isDateValid(birthDateEditText),
+                "birthDate" to validation!!.isBirthDateValid(birthDateEditText),
                 "phone" to validation!!.isPhoneValid(phoneEditText),
                 "password" to validation!!.isPasswordValid(passwordEditText, true),
                 "email" to validation!!.isEmailValid(emailEditText)

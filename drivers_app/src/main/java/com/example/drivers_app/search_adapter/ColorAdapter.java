@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ColorAdapter extends RecyclerView.Adapter<ColorAdapter.ExampleViewHolder> implements Filterable {
-    private List<ColorItem> exampleList;
-    private List<ColorItem> exampleListFull;
-    private Filter exampleFilter = new Filter() {
+    private final List<ColorItem> exampleList;
+    private final List<ColorItem> exampleListFull;
+    private final Filter exampleFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<ColorItem> filteredList = new ArrayList<>();
@@ -78,7 +78,7 @@ public class ColorAdapter extends RecyclerView.Adapter<ColorAdapter.ExampleViewH
     }
 
     class ExampleViewHolder extends RecyclerView.ViewHolder {
-        TextView textView1;
+        final TextView textView1;
 
         ExampleViewHolder(View itemView) {
             super(itemView);

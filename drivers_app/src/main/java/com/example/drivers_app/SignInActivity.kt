@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import com.example.drivers_app.MainActivity
+import com.example.taxiapp.IsAccountActivatedRequest
 import com.example.taxiapp.LoginRequest
 import com.example.taxiapp.LoginResponse
 import com.example.taxiapp.taxiServiceGrpc
@@ -82,15 +83,27 @@ class SignInActivity : AppCompatActivity() {
                 try {
                     loginResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).loginUser(loginRequest) // Запрос на создание
                     authToken = loginResponse.authToken
-                    managedChannel.shutdown()
                     if (authToken.isNotEmpty()) {
+
                         // Save data to preferences and start new activity
                         val sPref = getSharedPreferences("TaxiService", Context.MODE_PRIVATE)
                         sPref.edit().putLong("last_login", Date().time).apply() // Token saving into SharedPreferences
                         sPref.edit().putInt("driver_id", loginResponse.userId).apply() // Token saving into SharedPreferences
                         sPref.edit().putString("auth_token", authToken).apply() // Token saving into SharedPreferences
                         sPref.edit().putString("login", phoneText).apply() // Token saving into SharedPreferences
-                        val intent = Intent(applicationContext, MainActivity::class.java)
+
+                        // Is account activated
+                        val isAccountActivatedRequest = IsAccountActivatedRequest.newBuilder()
+                                .setApi(getString(R.string.api_version))
+                                .setDriverLogin(phoneText)
+                                .build()
+                        val isAccountActivatedResponse = blockingStub.isAccountActivated(isAccountActivatedRequest)
+                        managedChannel.shutdown()
+                        val intent = if (!isAccountActivatedResponse.isActivated) {
+                            Intent(applicationContext, UnverifiedAccountActivity::class.java)
+                        } else {
+                            Intent(applicationContext, MainActivity::class.java)
+                        }
                         startActivity(intent)
                         finish()
                     } else {
@@ -99,7 +112,7 @@ class SignInActivity : AppCompatActivity() {
                     }
                 } catch (e: StatusRuntimeException) {
                     // Check exceptions
-                    if (e.status.cause is java.net.ConnectException) {
+                    if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                         runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
                     } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
                         runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }

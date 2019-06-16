@@ -7,13 +7,12 @@
     tools:context=".AddInfoActivity">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         tools:context=".AddInfoActivity">
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/passportTextInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp">
@@ -44,7 +43,6 @@
             android:text="@string/load_passport_image" />
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/drivingLicenseTextInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -66,7 +64,6 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/expiryDateTextInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -110,8 +107,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:onClick="addCarDialog"
-            android:enabled="false"
+            android:onClick="registerDriver"
             android:text="@string/register" />
 
     </LinearLayout>

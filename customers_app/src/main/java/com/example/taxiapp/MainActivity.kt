@@ -162,7 +162,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
                                     runOnUiThread { showOrdersEndScreen() }
                                     stopTimer()
                                 } else {
-                                    runOnUiThread { setLiveCabRideInfo(cabRideStatus.checkCabRideResponse) } // Set riding condition
+                                    runOnUiThread {
+                                        setLiveCabRideInfo(cabRideStatus.checkCabRideResponse)
+                                        orderButton?.visibility = View.GONE
+                                    } // Set riding condition
                                 }
                             }
                         } else {
@@ -186,13 +189,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun showOrdersEndScreen() {
+        orderButton?.visibility = View.VISIBLE
+        orderButton.setOnClickListener {
+            makeOrderOptions(it)
+        }
+        currentPolyline?.remove()
         ridingEndDialog!!.show()
         ridingEndDialog?.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         ridingEndDialog!!.window!!.setGravity(Gravity.BOTTOM)
         addressTextView!!.text = getString(R.string.address)
         changeAddress!!.text = getString(R.string.change_address)
         orderButton!!.text = getString(R.string.make_order)
-        orderButton!!.background = ContextCompat.getDrawable(this@MainActivity, R.color.quantum_googgreen)
+        orderButton!!.background = ContextCompat.getDrawable(this@MainActivity, R.color.quantum_grey400)
         ridingEndDialog!!.setOnDismissListener {
             sPref!!.edit().putInt("orderedCabRideId", -1).apply()
         }
@@ -253,6 +261,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             }
         }
         autocompleteFragmentSetup(destinationEdit as AutocompleteSupportFragment)
+        (destinationEdit as AutocompleteSupportFragment).setHint(getString(R.string.destination))
         (destinationEdit as AutocompleteSupportFragment).setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 destinationMarker = mMap!!.addMarker(MarkerOptions().position(place.latLng!!))
@@ -345,7 +354,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         val cabRideRequest = CreateCabRideRequest.newBuilder()
                 .setApi(getString(R.string.api_version))
                 .setCabRide(cabRide)
-                .setPrice(tripPriceTextView!!.text.toString().split('.')[0]) // TODO check price set
+                .setPrice(tripPriceTextView!!.text.toString().split('.')[0].toInt()) // TODO check price set
                 .setAuthToken(sPref!!.getString("auth_token", ""))
                 .build()
         val cabRideResponse: CreateCabRideResponse
@@ -357,7 +366,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             return true
         } catch (e: StatusRuntimeException) {
             // Check exceptions
-            if (e.status.cause is java.net.ConnectException) {
+            if (e.status.cause is java.net.ConnectException || e.status.code == io.grpc.Status.DEADLINE_EXCEEDED.code) {
                 runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
             }
             if (e.status.code == io.grpc.Status.Code.NOT_FOUND || e.status.code == io.grpc.Status.Code.PERMISSION_DENIED) {
@@ -388,6 +397,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             deleteCabRideResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).deleteCabRide(deleteCabRideRequest) // Запрос на создание
             if (deleteCabRideResponse.isSuccessDeleted) {
                 sPref!!.edit().putInt("orderedCabRideId", -1).apply() // OrderId saving into SharedPreferences
+                currentPolyline?.remove() // clear map route
             } else {
                 throw StatusRuntimeException(io.grpc.Status.UNKNOWN)
             }
@@ -395,7 +405,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             return true
         } catch (e: StatusRuntimeException) {
             // Check exceptions
-            if (e.status.cause is java.net.ConnectException) {
+            if (e.status.cause is java.net.ConnectException || e.status.code == io.grpc.Status.DEADLINE_EXCEEDED.code) {
                 runOnUiThread { Toast.makeText(this@MainActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
             }
             if (e.status.code == io.grpc.Status.Code.NOT_FOUND || e.status.code == io.grpc.Status.Code.PERMISSION_DENIED) {

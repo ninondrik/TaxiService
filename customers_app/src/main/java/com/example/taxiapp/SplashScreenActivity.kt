@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import io.grpc.ManagedChannelBuilder
+import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -53,7 +54,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 } catch (e: StatusRuntimeException) {
-                    if (e.status.cause is java.net.ConnectException) {
+                    if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                         runOnUiThread { Toast.makeText(this@SplashScreenActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
                     }
                     //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());

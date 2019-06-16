@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="login">Логин</string>
+    <string name="login">Войти</string>
     <string name="password">Пароль</string>
     <string name="register">Зарегистрироваться</string>
     <string name="email_hint">Заполните email для получения чеков и новостной рассылки</string>
@@ -42,5 +42,4 @@
     <string name="trip_price">Стоимость поездки</string>
     <string name="trip_duration">Длительность поездки</string>
     <string name="user_is_already_exists">Пользователь уже существует</string>
-    <string name="trip_distance">Расстояние поездки</string>
 </resources>

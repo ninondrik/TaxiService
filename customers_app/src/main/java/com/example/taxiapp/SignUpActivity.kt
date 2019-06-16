@@ -61,6 +61,12 @@ class SignUpActivity : AppCompatActivity() {
                 validation!!.isPasswordValid(passwordEditText, true)
             }
         })
+        passwordEditText!!.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                passwordEditText!!.background.clearColorFilter()
+            }
+        }
+
         // Validate phone field
         phoneEditText!!.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -106,7 +112,7 @@ class SignUpActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 } catch (e: StatusRuntimeException) {
-                    if (e.status.cause is java.net.ConnectException) {
+                    if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                         runOnUiThread { Toast.makeText(this@SignUpActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
                     } else if (e.status.code == Status.UNKNOWN.code) {
                         runOnUiThread { Toast.makeText(this@SignUpActivity, R.string.user_is_already_exists, Toast.LENGTH_LONG).show() }

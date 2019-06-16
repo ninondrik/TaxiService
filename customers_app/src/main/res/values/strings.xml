@@ -43,5 +43,4 @@
     <string name="user_is_already_exists">User is already exists</string>
     <string name="trip_duration">Trip duration</string>
     <string name="trip_price">Trip price</string>
-    <string name="trip_distance">Trip distance</string>
 </resources>

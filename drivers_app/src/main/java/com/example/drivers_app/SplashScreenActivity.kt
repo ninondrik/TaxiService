@@ -6,10 +6,12 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.example.taxiapp.IsAccountActivatedRequest
 import com.example.taxiapp.TokenCheckRequest
 import com.example.taxiapp.TokenCheckResponse
 import com.example.taxiapp.taxiServiceGrpc
 import io.grpc.ManagedChannelBuilder
+import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -35,6 +37,7 @@ class SplashScreenActivity : AppCompatActivity() {
         savedLogin = sPref!!.getString("login", "")
         lastLogin = sPref!!.getLong("last_login", 0)
         loginTime = Date().time
+        // TODO check is account verified
         if (savedToken != "" || savedLogin != "" || (loginTime!! - lastLogin!!) / 2592000000.0 < 30) { // If last_login timestamp is older than 30 days
             GlobalScope.launch {
                 val managedChannel = ManagedChannelBuilder.forAddress(getString(R.string.server_address), resources.getInteger(R.integer.server_port)).usePlaintext().build()
@@ -48,16 +51,24 @@ class SplashScreenActivity : AppCompatActivity() {
                 val tokenCheckResponse: TokenCheckResponse
                 try {
                     tokenCheckResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS).tokenCheck(tokenCheckRequest) // Запрос на создание
+
+                    // Checking is account of driver activated
+                    val isAccountActivatedRequest = IsAccountActivatedRequest.newBuilder()
+                            .setApi(getString(R.string.api_version))
+                            .setDriverLogin(savedLogin)
+                            .build()
+                    val isAccountActivatedResponse = blockingStub.isAccountActivated(isAccountActivatedRequest)
+
                     managedChannel.shutdown()
-                    intent = if (tokenCheckResponse.isValidToken) {
-                        Intent(applicationContext, MainActivity::class.java)
-                    } else {
-                        Intent(applicationContext, SignInActivity::class.java)
+                    intent = when {
+                        !isAccountActivatedResponse.isActivated -> Intent(applicationContext, UnverifiedAccountActivity::class.java)
+                        tokenCheckResponse.isValidToken -> Intent(applicationContext, MainActivity::class.java)
+                        else -> Intent(applicationContext, SignInActivity::class.java)
                     }
                     startActivity(intent)
                     finish()
                 } catch (e: StatusRuntimeException) {
-                    if (e.status.cause is java.net.ConnectException) {
+                    if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                         runOnUiThread { Toast.makeText(this@SplashScreenActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
                     }
                     //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());

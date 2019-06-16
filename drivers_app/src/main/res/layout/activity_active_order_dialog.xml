@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -27,7 +28,8 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:text="----->"
-            android:textColor="@color/colorPrimary" />
+            android:textColor="@color/colorPrimary"
+            tools:ignore="HardcodedText" />
 
         <TextView
             android:id="@+id/routeDestination"
@@ -43,22 +45,27 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        style="?android:attr/buttonBarStyle"
         android:layout_height="wrap_content">
 
         <Button
             android:id="@+id/startTripButton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/btn_success"
-            android:text="@string/start_trip" />
+            android:text="@string/start_trip"
+            android:textColor="#000000" />
 
         <Button
             android:id="@+id/cancelOrderButton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/quantum_googred"
-            android:text="@string/cancel_order" />
+            android:text="@string/cancel_order"
+            android:textColor="#000000" />
     </LinearLayout>
 </LinearLayout>

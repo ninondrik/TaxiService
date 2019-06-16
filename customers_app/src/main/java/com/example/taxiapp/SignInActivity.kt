@@ -94,7 +94,7 @@ class SignInActivity : AppCompatActivity() {
                     }
                 } catch (e: StatusRuntimeException) {
                     // Check exceptions
-                    if (e.status.cause is java.net.ConnectException) {
+                    if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                         runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
                     } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
                         runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }

@@ -22,29 +22,11 @@
     <string name="for_registered_users">I\'m already registered in service.</string>
     <string name="not_registered">I\'m not registered yet.</string>
     <string name="address">Address</string>
-    <string name="change_address">Change address</string>
-    <string name="make_order">Make order</string>
     <string name="destination">Destination</string>
-    <string-array name="pay_type">
-        <item>Cash</item>
-    </string-array>
-    <string name="entrance">Entrance</string>
-    <string name="wishes">Wishes</string>
-    <string name="comment_for_driver">Comment for driver</string>
-    <string name="order_for_another_men">Order for another men</string>
-    <string name="ready">Done</string>
-    <string name="car_delivery">"Car delivery in 10 minutes "</string>
     <string name="cancel_order">Cancel order</string>
-    <string name="finding_driver">Finding driver…</string>
-    <string name="driver_is_coming">Driver is coming</string>
-    <string name="rate_ride">Rate the trip.</string>
-    <string name="feedback">Feedback</string>
-    <string name="send_feedback">Send feedback</string>
     <string name="phone_number_without_7">Phone number without +7</string>
     <string name="use_latin_and_next_symbols">Use latin and next symbols: $@!%*#?&amp;</string>
 
-    <string name="warning_address_not_found">Address wasn\'t found</string>
-    <string name="warning_unable_to_locate">Unable to locate a place</string>
     <string name="warning_weak_password">Weak password</string>
 
     <string name="error_internet_connection">No internet connection!</string>
@@ -61,7 +43,6 @@
     <string name="load_passport_image">Load passport image</string>
     <string name="load_driving_licence_image">Load driving license image</string>
     <string name="load_sts">Load certificate of registration of the vehicle</string>
-    <string name="load_car_image">Load car image</string>
     <string name="image_saved">Image saved</string>
     <string name="error_failed">Failed!</string>
     <string name="continue_registration">Continue registration</string>
@@ -87,14 +68,13 @@
     <string name="delete_car">Delete car</string>
     <string name="order_accept">Accept</string>
     <string name="order_skip">Skip</string>
-    <string name="accepted_order_time">Time</string>
-    <string name="accepted_order_arrived">I have arrived</string>
     <string name="startPoint">Start point</string>
-    <string name="toAcceptedOrderTime">To destination time</string>
-    <string name="distance">Distance</string>
     <string name="end_order">End order</string>
     <string name="start_trip">Start trip</string>
-    <string name="success_order_accepted_message">Order has been accepted</string>
+    <string name="success_order_accepted_message">Order has been started</string>
     <string name="success_order_ended_message">Order has been ended</string>
+    <string name="error_empty_fields">All fields must be set!</string>
+    <string name="error_under_eighteen_years">You must be over 18 years old</string>
+    <string name="message_account_is_not_verified">Account is not verified. It could take a while.</string>
 
 </resources>

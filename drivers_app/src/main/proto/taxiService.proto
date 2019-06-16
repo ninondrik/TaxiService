@@ -111,9 +111,10 @@ message CabRideStatus {
     int32 id = 1;
     int32 cabRideId = 2;
     int32 shiftId = 3;
-    google.protobuf.Timestamp statusTime = 4;
-    int32 statusDetails = 5;
-    int32 dispatcherId = 6;
+    int32 statusTime = 4;
+    string statusDetails = 5;
+    int32 ride_status = 6;
+    int32 dispatcherId = 7;
 
 }
 
@@ -233,7 +234,7 @@ message DeleteDriverResponse {
 message CreateCabRideRequest {
     string api = 1;
     CabRide cabRide = 2;
-    string price = 3;
+    int32 price = 3;
     string authToken = 4;
 }
 
@@ -337,6 +338,15 @@ message CheckAvailableRidesResponse {
 }
 */
 
+message IsAccountActivatedRequest {
+    string api = 1;
+    string driverLogin = 2;
+}
+message IsAccountActivatedResponse {
+    string api = 1;
+    bool isActivated = 2;
+}
+
 
 message CreateCabRequest {
     string api = 1;
@@ -430,6 +440,115 @@ message EndTripResponse {
     bool isEnded = 2;
 }
 
+// For dispatchers
+
+
+message CreateDispatcherRequest {
+    string api = 1;
+    Dispatcher dispatcher = 2;
+}
+
+message CreateDispatcherResponse {
+    string api = 1;
+    int32 id = 2;
+    string authToken = 3;
+}
+
+message CreateCabRideDispatcherRequest {
+    string api = 1;
+    CabRide cabRide = 2;
+    Customer customer = 3;
+    int32 price = 4;
+    string authToken = 5;
+}
+
+message CreateCabRideDispatcherResponse {
+    string api = 1;
+    bool isCreated = 2;
+    int32 cabRideId = 3;
+}
+
+message SetDetailsToOrderRequest {
+    string api = 1;
+    string message = 2;
+    int32 cabRideId = 3;
+}
+
+message SetDetailsToOrderResponse {
+    string api = 1;
+    bool isUpdated = 2;
+}
+
+
+message ReadAllDriversRequest {
+    string api = 1;
+    string authToken = 2;
+}
+message ReadAllDriversResponse {
+    string api = 1;
+    repeated Driver driver = 2;
+}
+
+message VerifyDriversAccountRequest {
+    string api = 1;
+    int32 driverId = 2;
+}
+
+message VerifyDriversAccountResponse {
+    string api = 1;
+    bool isVerified = 2;
+}
+
+message ReadAllCustomersRequest {
+    string api = 1;
+    string authToken = 2;
+}
+
+message ReadAllCustomersResponse {
+    string api = 1;
+    repeated Customer customer = 2;
+}
+
+message ReadAllCabRidesRequest {
+    string api = 1;
+    string authToken = 2;
+}
+
+message ReadAllCabRidesResponse {
+    string api = 1;
+    repeated CabRide cabRide = 2;
+}
+
+message ReadCabRideStatusRequest {
+    string api = 1;
+    string authToken = 2;
+    int32 cabRideId = 3;
+}
+
+message ReadCabRideStatusResponse {
+    string api = 1;
+    CabRideStatus cabRideStatus = 2;
+}
+
+message ReadDriverStatisticRequest {
+    string api = 1;
+    int32 driverId = 2;
+}
+
+message ReadDriverStatisticResponse {
+    string api = 1;
+    int32 endedCabRides = 2;
+}
+
+message ReadCustomerStatisticRequest {
+    string api = 1;
+    int32 customerId = 2;
+}
+
+message ReadCustomerStatisticResponse {
+    string api = 1;
+    int32 orderedCabRides = 2;
+}
 
 service taxiService {
     // Auth routes
@@ -439,6 +558,7 @@ service taxiService {
     // customer CRUD
     rpc CreateCustomer (CreateCustomerRequest) returns (CreateCustomerResponse);
     rpc ReadCustomer (ReadCustomerRequest) returns (ReadCustomerResponse);
+    rpc ReadAllCustomers (ReadAllCustomersRequest) returns (ReadAllCustomersResponse);
     rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
     rpc DeleteCustomer (DeleteCustomerRequest) returns (DeleteCustomerResponse);
 
@@ -453,6 +573,10 @@ service taxiService {
     rpc DeleteCabRide (DeleteCabRideRequest) returns (DeleteCabRideResponse);
     rpc UpdateCabRide (UpdateCabRideRequest) returns (UpdateCabRideResponse);
     rpc CheckCabRideStatus (CheckCabRideStatusRequest) returns (CheckCabRideStatusResponse);
+    rpc ReadAllCabRides (ReadAllCabRidesRequest) returns (ReadAllCabRidesResponse);
+
+    // CabRide status
+    rpc ReadCabRideStatus (ReadCabRideStatusRequest) returns (ReadCabRideStatusResponse);
 
     // Cabs routes
     rpc ReadAllCarBrands (ReadAllCarBrandsRequest) returns (ReadAllCarBrandsResponse);
@@ -460,6 +584,8 @@ service taxiService {
     rpc GetColors (ReadAllColorsRequest) returns (ReadAllColorsResponse);
 
     //    rpc ChangeDriverStatus (ChangeStatusRequest) returns (ChangeStatusResponse);
+    rpc IsAccountActivated (IsAccountActivatedRequest) returns (IsAccountActivatedResponse);
+
     rpc AcceptOrder (AcceptOrderRequest) returns (AcceptOrderResponse);
     rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse);
     rpc StartTrip (StartTripRequest) returns (StartTripResponse);
@@ -473,4 +599,15 @@ service taxiService {
     rpc CreateCab (CreateCabRequest) returns (CreateCabResponse);
 
     rpc CheckAvailableOrders (CheckAvailableOrdersRequest) returns (CheckAvailableOrdersResponse);
+
+    // For dispatchers
+    rpc CreateDispatcher (CreateDispatcherRequest) returns (CreateDispatcherResponse);
+    rpc CreateCabRideDispatcher (CreateCabRideDispatcherRequest) returns (CreateCabRideDispatcherResponse);
+    rpc SetDetailsToOrder (SetDetailsToOrderRequest) returns (SetDetailsToOrderResponse);
+    rpc ReadAllDrivers (ReadAllDriversRequest) returns (ReadAllDriversResponse);
+    rpc VerifyDriversAccount (VerifyDriversAccountRequest) returns (VerifyDriversAccountResponse);
+
+    // Statistic
+    rpc ReadDriverStatistic (ReadDriverStatisticRequest) returns (ReadDriverStatisticResponse);
+    rpc ReadCustomerStatistic (ReadCustomerStatisticRequest) returns (ReadCustomerStatisticResponse);
 }

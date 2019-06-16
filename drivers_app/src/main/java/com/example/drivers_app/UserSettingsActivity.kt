@@ -165,7 +165,7 @@ class UserSettingsActivity : AppCompatActivity() {
                 createCabResponse = blockingStub.createCab(createCabRequest)
                 Log.i("Cab was created: id = ", createCabResponse.cabId.toString())
             } catch (e: StatusRuntimeException) {
-                if (e.status.cause is java.net.ConnectException) {
+                if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                     runOnUiThread { Toast.makeText(this@UserSettingsActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
                 } else if (e.status == Status.UNKNOWN) {
                     runOnUiThread { Toast.makeText(this@UserSettingsActivity, R.string.error_cannot_load_car_brands, Toast.LENGTH_LONG).show() }
@@ -207,7 +207,7 @@ class UserSettingsActivity : AppCompatActivity() {
             }
 
         } catch (e: StatusRuntimeException) {
-            if (e.status.cause is java.net.ConnectException) {
+            if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                 runOnUiThread { Toast.makeText(this@UserSettingsActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
             } else if (e.status == Status.UNKNOWN) {
                 runOnUiThread { Toast.makeText(this@UserSettingsActivity, R.string.error_cannot_load_car_brands, Toast.LENGTH_LONG).show() }
@@ -236,7 +236,7 @@ class UserSettingsActivity : AppCompatActivity() {
                 }
             }
         } catch (e: StatusRuntimeException) {
-            if (e.status.cause is java.net.ConnectException) {
+            if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                 runOnUiThread { Toast.makeText(this@UserSettingsActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
             } else if (e.status == Status.UNKNOWN) {
                 runOnUiThread { Toast.makeText(this@UserSettingsActivity, R.string.error_cannot_load_car_models, Toast.LENGTH_LONG).show() }
@@ -262,7 +262,7 @@ class UserSettingsActivity : AppCompatActivity() {
             }
 
         } catch (e: StatusRuntimeException) {
-            if (e.status.cause is java.net.ConnectException) {
+            if (e.status.cause is java.net.ConnectException || e.status.code == Status.DEADLINE_EXCEEDED.code) {
                 runOnUiThread { Toast.makeText(this@UserSettingsActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
             } else if (e.status == Status.UNKNOWN) {
                 runOnUiThread { Toast.makeText(this@UserSettingsActivity, R.string.error_cannot_load_car_brands, Toast.LENGTH_LONG).show() }
